@@ -7,7 +7,10 @@ add_llvm_target(H2BLBCodeGen
   H2BLBDesc
   H2BLBInfo
 
+  CodeGen
+  Core
   Support
+  Target
 
   ADD_TO_COMPONENT
   H2BLB

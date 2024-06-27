@@ -1,0 +1,33 @@
+//=-- H2BLBTargetMachine.h - Define TargetMachine for H2BLB -------*- C++ -*-=//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+//
+// This file declares the H2BLB specific subclass of TargetMachine.
+//
+//===----------------------------------------------------------------------===//
+
+#ifndef LLVM_LIB_TARGET_H2BLB_H2BLBTARGETMACHINE_H
+#define LLVM_LIB_TARGET_H2BLB_H2BLBTARGETMACHINE_H
+
+#include "llvm/Target/TargetMachine.h"
+#include <optional>
+
+namespace llvm {
+
+class H2BLBTargetMachine : public LLVMTargetMachine {
+public:
+  H2BLBTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                     StringRef FS, const TargetOptions &Options,
+                     std::optional<Reloc::Model> RM,
+                     std::optional<CodeModel::Model> CM, CodeGenOptLevel OL,
+                     bool JIT);
+  ~H2BLBTargetMachine() override;
+};
+
+} // end namespace llvm
+
+#endif

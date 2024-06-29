@@ -316,6 +316,16 @@ namespace clang {
     bool isFlagSet(uint64_t Flag) const { return Flags & Flag; }
   };
 
+  /// H2BLB builtins
+  namespace H2BLB {
+  enum {
+    LastTIBuiltin = clang::Builtin::FirstTSBuiltin - 1,
+#define BUILTIN(ID, TYPE, ATTRS) BI##ID,
+#include "clang/Basic/BuiltinsH2BLB.def"
+    LastTSBuiltin
+  };
+  } // namespace H2BLB
+
   /// Hexagon builtins
   namespace Hexagon {
     enum {

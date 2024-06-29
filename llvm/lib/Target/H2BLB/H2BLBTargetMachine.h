@@ -32,6 +32,7 @@ public:
   ~H2BLBTargetMachine() override;
 
   const H2BLBSubtarget *getSubtargetImpl(const Function &F) const override;
+  TargetTransformInfo getTargetTransformInfo(const Function &F) const override;
 };
 
 } // end namespace llvm

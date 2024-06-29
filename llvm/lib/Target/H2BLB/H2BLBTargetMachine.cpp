@@ -11,6 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "H2BLBTargetMachine.h"
+#include "H2BLBTargetTransformInfo.h"
 #include "TargetInfo/H2BLBTargetInfo.h" // For getTheH2BLBTarget.
 #include "llvm/MC/TargetRegistry.h"     // For RegisterTargetMachine.
 #include "llvm/Support/Compiler.h"      // For LLVM_EXTERNAL_VISIBILITY.
@@ -56,4 +57,9 @@ H2BLBTargetMachine::getSubtargetImpl(const Function &F) const {
     SubtargetSingleton =
         std::make_unique<H2BLBSubtarget>(TargetTriple, CPU, FS, *this);
   return SubtargetSingleton.get();
+}
+
+TargetTransformInfo
+H2BLBTargetMachine::getTargetTransformInfo(const Function &F) const {
+  return TargetTransformInfo(H2BLBTTIImpl(this, F));
 }

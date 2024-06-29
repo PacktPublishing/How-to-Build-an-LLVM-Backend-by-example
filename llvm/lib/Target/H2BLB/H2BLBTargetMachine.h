@@ -13,12 +13,16 @@
 #ifndef LLVM_LIB_TARGET_H2BLB_H2BLBTARGETMACHINE_H
 #define LLVM_LIB_TARGET_H2BLB_H2BLBTARGETMACHINE_H
 
+#include "H2BLBSubtarget.h"
 #include "llvm/Target/TargetMachine.h"
+#include <memory>
 #include <optional>
 
 namespace llvm {
 
 class H2BLBTargetMachine : public LLVMTargetMachine {
+  mutable std::unique_ptr<H2BLBSubtarget> SubtargetSingleton;
+
 public:
   H2BLBTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
                      StringRef FS, const TargetOptions &Options,
@@ -26,6 +30,8 @@ public:
                      std::optional<CodeModel::Model> CM, CodeGenOptLevel OL,
                      bool JIT);
   ~H2BLBTargetMachine() override;
+
+  const H2BLBSubtarget *getSubtargetImpl(const Function &F) const override;
 };
 
 } // end namespace llvm

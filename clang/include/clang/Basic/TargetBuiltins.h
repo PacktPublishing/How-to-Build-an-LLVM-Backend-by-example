@@ -321,7 +321,7 @@ namespace clang {
   enum {
     LastTIBuiltin = clang::Builtin::FirstTSBuiltin - 1,
 #define BUILTIN(ID, TYPE, ATTRS) BI##ID,
-#include "clang/Basic/BuiltinsH2BLB.def"
+#include "clang/Basic/BuiltinsH2BLB.inc"
     LastTSBuiltin
   };
   } // namespace H2BLB

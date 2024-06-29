@@ -29,7 +29,7 @@ static constexpr Builtin::Info BuiltinInfo[] = {
   {#ID, TYPE, ATTRS, nullptr, HEADER, ALL_LANGUAGES},
 #define TARGET_BUILTIN(ID, TYPE, ATTRS, FEATURE)                               \
   {#ID, TYPE, ATTRS, FEATURE, HeaderDesc::NO_HEADER, ALL_LANGUAGES},
-#include "clang/Basic/BuiltinsH2BLB.def"
+#include "clang/Basic/BuiltinsH2BLB.inc"
 };
 
 ArrayRef<Builtin::Info> H2BLBTargetInfo::getTargetBuiltins() const {

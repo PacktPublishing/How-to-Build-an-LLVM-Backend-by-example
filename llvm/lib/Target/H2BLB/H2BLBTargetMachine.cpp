@@ -14,6 +14,7 @@
 #include "TargetInfo/H2BLBTargetInfo.h" // For getTheH2BLBTarget.
 #include "llvm/MC/TargetRegistry.h"     // For RegisterTargetMachine.
 #include "llvm/Support/Compiler.h"      // For LLVM_EXTERNAL_VISIBILITY.
+#include <memory>
 
 using namespace llvm;
 
@@ -38,3 +39,21 @@ H2BLBTargetMachine::H2BLBTargetMachine(const Target &T, const Triple &TT,
                                CM ? *CM : CodeModel::Small, OL) {}
 
 H2BLBTargetMachine::~H2BLBTargetMachine() = default;
+
+const H2BLBSubtarget *
+H2BLBTargetMachine::getSubtargetImpl(const Function &F) const {
+  Attribute CPUAttr = F.getFnAttribute("target-cpu");
+  Attribute FSAttr = F.getFnAttribute("target-features");
+
+  StringRef CPU = CPUAttr.isValid() ? CPUAttr.getValueAsString() : TargetCPU;
+  StringRef FS = FSAttr.isValid() ? FSAttr.getValueAsString() : TargetFS;
+
+  // Eventually, we'll want to hook up a different subtarget based on at the
+  // target feature, target cpu, and tune cpu attached to F, but as of now,
+  // the target doesn't support anything fancy so we just have one subtarget
+  // for everything.
+  if (!SubtargetSingleton)
+    SubtargetSingleton =
+        std::make_unique<H2BLBSubtarget>(TargetTriple, CPU, FS, *this);
+  return SubtargetSingleton.get();
+}

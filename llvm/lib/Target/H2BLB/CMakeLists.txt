@@ -13,6 +13,7 @@ add_llvm_target(H2BLBCodeGen
 
   CodeGen
   Core
+  Passes
   Support
   Target
 

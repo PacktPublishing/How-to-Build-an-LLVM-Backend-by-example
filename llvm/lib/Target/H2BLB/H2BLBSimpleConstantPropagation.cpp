@@ -214,6 +214,6 @@ INITIALIZE_PASS(/*passImplementationName=*/H2BLBSimpleConstantPropagation,
                 /*isCFGOnly=*/false,
                 /*isAnalysis=*/false)
 
-Pass *createH2BLBSimpleConstantPropagationPassForLegacyPM() {
+Pass *llvm::createH2BLBSimpleConstantPropagationPassForLegacyPM() {
   return new H2BLBSimpleConstantPropagation();
 }

@@ -72,4 +72,14 @@ H2BLBTargetMachine::getTargetTransformInfo(const Function &F) const {
 void H2BLBTargetMachine::registerPassBuilderCallbacks(PassBuilder &PB) {
 #define GET_PASS_REGISTRY "H2BLBPassRegistry.def"
 #include "llvm/Passes/TargetPassRegistry.inc"
+
+  PB.registerPipelineStartEPCallback(
+      [](ModulePassManager &MPM, OptimizationLevel OptLevel) {
+        // Do not add optimization passes if we are in O0.
+        if (OptLevel == OptimizationLevel::O0)
+          return;
+        FunctionPassManager FPM;
+        FPM.addPass(H2BLBSimpleConstantPropagationNewPass());
+        MPM.addPass(createModuleToFunctionPassAdaptor(std::move(FPM)));
+      });
 }

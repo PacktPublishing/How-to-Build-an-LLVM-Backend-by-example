@@ -15,7 +15,8 @@
 #include "H2BLBTargetObjectFile.h"
 #include "H2BLBTargetTransformInfo.h"
 #include "TargetInfo/H2BLBTargetInfo.h" // For getTheH2BLBTarget.
-#include "llvm/MC/TargetRegistry.h"     // For RegisterTargetMachine.
+#include "llvm/CodeGen/TargetPassConfig.h"
+#include "llvm/MC/TargetRegistry.h" // For RegisterTargetMachine.
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Support/Compiler.h" // For LLVM_EXTERNAL_VISIBILITY.
 #include <memory>
@@ -96,3 +97,10 @@ void H2BLBTargetMachine::registerPassBuilderCallbacks(PassBuilder &PB) {
         MPM.addPass(createModuleToFunctionPassAdaptor(std::move(FPM)));
       });
 }
+
+TargetPassConfig *H2BLBTargetMachine::createPassConfig(PassManagerBase &PM) {
+  return new H2BLBPassConfig(*this, PM);
+}
+
+H2BLBPassConfig::H2BLBPassConfig(LLVMTargetMachine &TM, PassManagerBase &PM)
+    : TargetPassConfig(TM, PM) {}

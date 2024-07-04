@@ -49,6 +49,8 @@ public:
 class H2BLBPassConfig : public TargetPassConfig {
 public:
   H2BLBPassConfig(TargetMachine &TM, PassManagerBase &PM);
+
+  bool addInstSelector() override;
 };
 
 } // end namespace llvm

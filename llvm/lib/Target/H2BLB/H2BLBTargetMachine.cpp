@@ -42,7 +42,9 @@ H2BLBTargetMachine::H2BLBTargetMachine(const Target &T, const Triple &TT,
     : CodeGenTargetMachineImpl(T, H2BLBDataLayoutStr, TT, CPU, FS, Options,
                                // Use the simplest relocation by default.
                                RM ? *RM : Reloc::Static,
-                               CM ? *CM : CodeModel::Small, OL) {}
+                               CM ? *CM : CodeModel::Small, OL) {
+  initAsmInfo();
+}
 
 H2BLBTargetMachine::~H2BLBTargetMachine() = default;
 

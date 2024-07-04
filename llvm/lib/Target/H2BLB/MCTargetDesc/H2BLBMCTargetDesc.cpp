@@ -12,6 +12,7 @@
 
 #include "H2BLBMCTargetDesc.h"
 #include "TargetInfo/H2BLBTargetInfo.h" // For getTheH2BLBTarget.
+#include "llvm/MC/MCInstrInfo.h"
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/Support/Compiler.h"  // For LLVM_EXTERNAL_VISIBILITY.
@@ -28,6 +29,12 @@ static MCRegisterInfo *createH2BLBMCRegisterInfo(const Triple &Triple) {
   return X;
 }
 
+static MCInstrInfo *createH2BLBMCInstrInfo() {
+  MCInstrInfo *X = new MCInstrInfo();
+  // TODO: Fill out the instr info.
+  return X;
+}
+
 static MCSubtargetInfo *
 createH2BLBMCSubtargetInfo(const Triple &TT, StringRef CPU, StringRef FS) {
   return createH2BLBMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
@@ -35,6 +42,9 @@ createH2BLBMCSubtargetInfo(const Triple &TT, StringRef CPU, StringRef FS) {
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeH2BLBTargetMC() {
   Target &TheTarget = getTheH2BLBTarget();
+
+  // Register the MC instruction info.
+  TargetRegistry::RegisterMCInstrInfo(TheTarget, createH2BLBMCInstrInfo);
 
   // Register the MC register info.
   TargetRegistry::RegisterMCRegInfo(TheTarget, createH2BLBMCRegisterInfo);

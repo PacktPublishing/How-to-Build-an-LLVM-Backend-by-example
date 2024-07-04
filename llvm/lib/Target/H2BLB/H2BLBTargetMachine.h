@@ -14,6 +14,7 @@
 #define LLVM_LIB_TARGET_H2BLB_H2BLBTARGETMACHINE_H
 
 #include "H2BLBSubtarget.h"
+#include "llvm/Target/TargetLoweringObjectFile.h"
 #include "llvm/Target/TargetMachine.h"
 #include <memory>
 #include <optional>
@@ -22,6 +23,7 @@ namespace llvm {
 
 class H2BLBTargetMachine : public LLVMTargetMachine {
   mutable std::unique_ptr<H2BLBSubtarget> SubtargetSingleton;
+  std::unique_ptr<TargetLoweringObjectFile> TLOF;
 
 public:
   H2BLBTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
@@ -33,6 +35,10 @@ public:
 
   const H2BLBSubtarget *getSubtargetImpl(const Function &F) const override;
   TargetTransformInfo getTargetTransformInfo(const Function &F) const override;
+
+  TargetLoweringObjectFile *getObjFileLowering() const override {
+    return TLOF.get();
+  }
 
   // Register the target specific passes that this backend offers.
   void registerPassBuilderCallbacks(PassBuilder &PB) override;

@@ -12,6 +12,7 @@
 
 #include "H2BLBTargetMachine.h"
 #include "H2BLB.h"
+#include "H2BLBTargetObjectFile.h"
 #include "H2BLBTargetTransformInfo.h"
 #include "TargetInfo/H2BLBTargetInfo.h" // For getTheH2BLBTarget.
 #include "llvm/MC/TargetRegistry.h"     // For RegisterTargetMachine.
@@ -29,6 +30,15 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeH2BLBTarget() {
   initializeH2BLBSimpleConstantPropagationPass(PR);
 }
 
+static std::unique_ptr<TargetLoweringObjectFile> createTLOF(const Triple &TT) {
+  if (TT.isOSBinFormatELF())
+    return std::make_unique<H2BLB_ELFTargetObjectFile>();
+  if (TT.isOSBinFormatMachO())
+    return std::make_unique<H2BLB_MachoTargetObjectFile>();
+  // Other format not supported yet.
+  return nullptr;
+}
+
 // TODO: Share this with Clang.
 static const char *H2BLBDataLayoutStr =
     "e-p:16:16:16-n16:32-i32:32:32-i16:16:16-i1:8:8-f32:32:32-v32:32:32";
@@ -42,7 +52,8 @@ H2BLBTargetMachine::H2BLBTargetMachine(const Target &T, const Triple &TT,
     : LLVMTargetMachine(T, H2BLBDataLayoutStr, TT, CPU, FS, Options,
                         // Use the simplest relocation by default.
                         RM ? *RM : Reloc::Static, CM ? *CM : CodeModel::Small,
-                        OL) {
+                        OL),
+      TLOF(createTLOF(getTargetTriple())) {
   initAsmInfo();
 }
 

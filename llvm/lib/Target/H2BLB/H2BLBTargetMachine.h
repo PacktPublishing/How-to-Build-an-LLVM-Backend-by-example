@@ -51,6 +51,7 @@ public:
   H2BLBPassConfig(LLVMTargetMachine &TM, PassManagerBase &PM);
 
   bool addInstSelector() override;
+  void addIRPasses() override;
 };
 
 } // end namespace llvm

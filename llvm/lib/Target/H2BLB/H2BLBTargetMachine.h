@@ -14,6 +14,7 @@
 #define LLVM_LIB_TARGET_H2BLB_H2BLBTARGETMACHINE_H
 
 #include "H2BLBSubtarget.h"
+#include "llvm/CodeGen/TargetPassConfig.h"
 #include "llvm/Target/TargetLoweringObjectFile.h"
 #include "llvm/Target/TargetMachine.h"
 #include <memory>
@@ -42,6 +43,12 @@ public:
 
   // Register the target specific passes that this backend offers.
   void registerPassBuilderCallbacks(PassBuilder &PB) override;
+  TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+};
+
+class H2BLBPassConfig : public TargetPassConfig {
+public:
+  H2BLBPassConfig(LLVMTargetMachine &TM, PassManagerBase &PM);
 };
 
 } // end namespace llvm

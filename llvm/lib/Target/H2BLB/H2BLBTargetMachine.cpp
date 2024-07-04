@@ -42,7 +42,9 @@ H2BLBTargetMachine::H2BLBTargetMachine(const Target &T, const Triple &TT,
     : LLVMTargetMachine(T, H2BLBDataLayoutStr, TT, CPU, FS, Options,
                         // Use the simplest relocation by default.
                         RM ? *RM : Reloc::Static, CM ? *CM : CodeModel::Small,
-                        OL) {}
+                        OL) {
+  initAsmInfo();
+}
 
 H2BLBTargetMachine::~H2BLBTargetMachine() = default;
 

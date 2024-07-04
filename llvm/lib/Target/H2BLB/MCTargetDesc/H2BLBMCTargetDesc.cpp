@@ -11,11 +11,14 @@
 //===----------------------------------------------------------------------===//
 
 #include "H2BLBMCTargetDesc.h"
+#include "H2BLBMCAsmInfo.h"
 #include "TargetInfo/H2BLBTargetInfo.h" // For getTheH2BLBTarget.
 #include "llvm/MC/MCInstrInfo.h"
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/MCSubtargetInfo.h"
+#include "llvm/MC/TargetRegistry.h" // For RegisterMCAsmInfoFn.
 #include "llvm/Support/Compiler.h"  // For LLVM_EXTERNAL_VISIBILITY.
+#include "llvm/Support/ErrorHandling.h"
 #include "llvm/TargetParser/Triple.h"
 
 using namespace llvm;
@@ -40,8 +43,25 @@ createH2BLBMCSubtargetInfo(const Triple &TT, StringRef CPU, StringRef FS) {
   return createH2BLBMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
 }
 
+static MCAsmInfo *createH2BLBMCAsmInfo(const MCRegisterInfo &MRI,
+                                       const Triple &TheTriple,
+                                       const MCTargetOptions &Options) {
+  MCAsmInfo *MAI;
+  if (TheTriple.isOSBinFormatMachO())
+    MAI = new H2BLBMCAsmInfoDarwin(TheTriple, Options);
+  else if (TheTriple.isOSBinFormatELF())
+    MAI = new H2BLBMCAsmInfoELF(TheTriple, Options);
+  else
+    report_fatal_error("Binary format not supported");
+
+  return MAI;
+}
+
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeH2BLBTargetMC() {
   Target &TheTarget = getTheH2BLBTarget();
+
+  // Register the MC asm info.
+  RegisterMCAsmInfoFn X(TheTarget, createH2BLBMCAsmInfo);
 
   // Register the MC instruction info.
   TargetRegistry::RegisterMCInstrInfo(TheTarget, createH2BLBMCInstrInfo);

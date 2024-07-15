@@ -1,3 +1,11 @@
+This is the second repo for the book "How to Build an LLVM Backend".
+This will be linked to the main repo for this title.
+
+The purpose of this repository is to offer a step by step implementation of an LLVM backend from scratch.
+Use the begin_chXX end_chXX tags to follow what we do in the related chapters.
+
+Below follows the original README.md
+
 # The LLVM Compiler Infrastructure
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/llvm/llvm-project/badge)](https://securityscorecards.dev/viewer/?uri=github.com/llvm/llvm-project)

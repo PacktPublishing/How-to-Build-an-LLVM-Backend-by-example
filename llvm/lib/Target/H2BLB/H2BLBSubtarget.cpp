@@ -14,15 +14,16 @@
 #include "llvm/Target/TargetMachine.h"
 
 using namespace llvm;
+
+#define DEBUG_TYPE "h2blb-subtarget"
+
+#define GET_SUBTARGETINFO_TARGET_DESC
+#define GET_SUBTARGETINFO_CTOR
+#include "H2BLBGenSubtargetInfo.inc"
+
 // Pin the vtable to this file.
 void H2BLBSubtarget::anchor() {}
 
 H2BLBSubtarget::H2BLBSubtarget(const Triple &TT, StringRef CPU, StringRef FS,
                                const TargetMachine &TM)
-    : TargetSubtargetInfo(TT, CPU, /*TuneCPU=*/"", FS, /*PF=*/{},
-                          /*PD=*/{},
-                          /*WPR=*/nullptr,
-                          /*WL=*/nullptr,
-                          /*RA=*/nullptr, /*IS=*/nullptr,
-                          /*OC=*/nullptr, /*FP=*/nullptr),
-      TLInfo(TM) {}
+    : H2BLBGenSubtargetInfo(TT, CPU, /*TuneCPU=*/"", FS), TLInfo(TM) {}

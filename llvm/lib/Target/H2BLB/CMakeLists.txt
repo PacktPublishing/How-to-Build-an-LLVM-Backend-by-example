@@ -3,6 +3,7 @@ add_llvm_component_group(H2BLB)
 set(LLVM_TARGET_DEFINITIONS H2BLB.td)
 
 tablegen(LLVM H2BLBGenSubtargetInfo.inc -gen-subtarget)
+tablegen(LLVM H2BLBGenRegisterInfo.inc -gen-register-info)
 
 add_public_tablegen_target(H2BLBCommonTableGen)
 

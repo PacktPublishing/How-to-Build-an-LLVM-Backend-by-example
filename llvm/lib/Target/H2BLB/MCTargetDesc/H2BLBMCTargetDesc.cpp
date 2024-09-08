@@ -11,6 +11,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "H2BLBMCTargetDesc.h"
+
+#include "H2BLBInstPrinter.h"
 #include "H2BLBMCAsmInfo.h"
 #include "TargetInfo/H2BLBTargetInfo.h" // For getTheH2BLBTarget.
 #include "llvm/MC/MCInstrInfo.h"
@@ -64,6 +66,16 @@ static MCAsmInfo *createH2BLBMCAsmInfo(const MCRegisterInfo &MRI,
   return MAI;
 }
 
+static MCInstPrinter *createH2BLBMCInstPrinter(const Triple &T,
+                                               unsigned SyntaxVariant,
+                                               const MCAsmInfo &MAI,
+                                               const MCInstrInfo &MII,
+                                               const MCRegisterInfo &MRI) {
+  if (SyntaxVariant == 0)
+    return new H2BLBInstPrinter(MAI, MII, MRI);
+  return nullptr;
+}
+
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeH2BLBTargetMC() {
   Target &TheTarget = getTheH2BLBTarget();
 
@@ -79,4 +91,6 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeH2BLBTargetMC() {
   // Register the MC subtarget info.
   TargetRegistry::RegisterMCSubtargetInfo(TheTarget,
                                           createH2BLBMCSubtargetInfo);
+  // Register the MCInst to asm printer.
+  TargetRegistry::RegisterMCInstPrinter(TheTarget, createH2BLBMCInstPrinter);
 }

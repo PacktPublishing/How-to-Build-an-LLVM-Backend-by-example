@@ -5,6 +5,8 @@ set(LLVM_TARGET_DEFINITIONS H2BLB.td)
 tablegen(LLVM H2BLBGenSubtargetInfo.inc -gen-subtarget)
 tablegen(LLVM H2BLBGenRegisterInfo.inc -gen-register-info)
 tablegen(LLVM H2BLBGenInstrInfo.inc -gen-instr-info)
+# MCInst to .s
+tablegen(LLVM H2BLBGenAsmWriter.inc -gen-asm-writer)
 
 add_public_tablegen_target(H2BLBCommonTableGen)
 

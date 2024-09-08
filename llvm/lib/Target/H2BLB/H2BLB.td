@@ -18,6 +18,9 @@ include "H2BLBInstrInfo.td"
 
 def H2BLBInstrInfo : InstrInfo;
 
+def H2BLBAsmParser : AsmParser;
+
 def H2BLB : Target {
   let InstructionSet = H2BLBInstrInfo;
+  let AssemblyParsers = [H2BLBAsmParser];
 }

@@ -7,6 +7,8 @@ tablegen(LLVM H2BLBGenRegisterInfo.inc -gen-register-info)
 tablegen(LLVM H2BLBGenInstrInfo.inc -gen-instr-info)
 # MCInst to .s
 tablegen(LLVM H2BLBGenAsmWriter.inc -gen-asm-writer)
+# .s to MCInst
+tablegen(LLVM H2BLBGenAsmMatcher.inc -gen-asm-matcher)
 
 add_public_tablegen_target(H2BLBCommonTableGen)
 
@@ -32,5 +34,6 @@ add_llvm_target(H2BLBCodeGen
   H2BLB
 )
 
+add_subdirectory(AsmParser)
 add_subdirectory(MCTargetDesc)
 add_subdirectory(TargetInfo)

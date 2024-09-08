@@ -13,6 +13,8 @@
 // Include the generic target definitions.
 include "llvm/Target/Target.td"
 
+include "H2BLBRegisterInfo.td"
+
 def : ProcessorModel<"generic", NoSchedModel, /*Features=*/[]>;
 
 def H2BLBInstrInfo : InstrInfo;

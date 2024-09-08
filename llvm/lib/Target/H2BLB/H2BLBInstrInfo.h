@@ -1,0 +1,29 @@
+//===-- H2BLBInstrInfo.h - H2BLB Instruction Information --------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+//
+// This file contains the H2BLB implementation of the TargetInstrInfo class.
+//
+//===----------------------------------------------------------------------===//
+
+#ifndef LLVM_LIB_TARGET_H2BLB_H2BLBINSTRINFO_H
+#define LLVM_LIB_TARGET_H2BLB_H2BLBINSTRINFO_H
+
+#include "llvm/CodeGen/TargetInstrInfo.h"
+
+#define GET_INSTRINFO_HEADER
+#include "H2BLBGenInstrInfo.inc"
+
+namespace llvm {
+
+class H2BLBInstrInfo : public H2BLBGenInstrInfo {
+public:
+  H2BLBInstrInfo();
+};
+} // namespace llvm
+
+#endif

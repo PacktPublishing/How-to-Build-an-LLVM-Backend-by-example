@@ -13,6 +13,8 @@
 // Include the generic target definitions.
 include "llvm/Target/Target.td"
 
+include "H2BLBRegisterInfo.td"
+
 def H2BLBInstrInfo : InstrInfo;
 
 def H2BLB : Target {

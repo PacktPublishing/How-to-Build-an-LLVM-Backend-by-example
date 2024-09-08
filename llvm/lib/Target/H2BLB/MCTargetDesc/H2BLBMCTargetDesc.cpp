@@ -29,6 +29,10 @@ using namespace llvm;
 #define GET_REGINFO_MC_DESC
 #include "H2BLBGenRegisterInfo.inc"
 
+#define GET_INSTRINFO_MC_DESC
+#define GET_INSTRINFO_MC_HELPERS
+#include "H2BLBGenInstrInfo.inc"
+
 static MCRegisterInfo *createH2BLBMCRegisterInfo(const Triple &Triple) {
   MCRegisterInfo *X = new MCRegisterInfo();
   InitH2BLBMCRegisterInfo(X, H2BLB::R7);
@@ -37,7 +41,7 @@ static MCRegisterInfo *createH2BLBMCRegisterInfo(const Triple &Triple) {
 
 static MCInstrInfo *createH2BLBMCInstrInfo() {
   MCInstrInfo *X = new MCInstrInfo();
-  // TODO: Fill out the instr info.
+  InitH2BLBMCInstrInfo(X);
   return X;
 }
 

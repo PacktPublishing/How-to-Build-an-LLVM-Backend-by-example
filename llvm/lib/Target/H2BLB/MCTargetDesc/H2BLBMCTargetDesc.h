@@ -24,4 +24,8 @@
 #define GET_SUBTARGETINFO_ENUM
 #include "H2BLBGenSubtargetInfo.inc"
 
+#define GET_INSTRINFO_ENUM
+#define GET_INSTRINFO_MC_HELPER_DECLS
+#include "H2BLBGenInstrInfo.inc"
+
 #endif

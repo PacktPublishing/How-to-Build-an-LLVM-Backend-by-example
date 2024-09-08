@@ -26,9 +26,12 @@ using namespace llvm;
 #define GET_SUBTARGETINFO_MC_DESC
 #include "H2BLBGenSubtargetInfo.inc"
 
+#define GET_REGINFO_MC_DESC
+#include "H2BLBGenRegisterInfo.inc"
+
 static MCRegisterInfo *createH2BLBMCRegisterInfo(const Triple &Triple) {
   MCRegisterInfo *X = new MCRegisterInfo();
-  // TODO: Fill out the register info.
+  InitH2BLBMCRegisterInfo(X, H2BLB::R7);
   return X;
 }
 

@@ -93,4 +93,8 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeH2BLBTargetMC() {
                                           createH2BLBMCSubtargetInfo);
   // Register the MCInst to asm printer.
   TargetRegistry::RegisterMCInstPrinter(TheTarget, createH2BLBMCInstPrinter);
+
+  // Register the MC code emitter.
+  TargetRegistry::RegisterMCCodeEmitter(getTheH2BLBTarget(),
+                                        createH2BLBMCCodeEmitter);
 }

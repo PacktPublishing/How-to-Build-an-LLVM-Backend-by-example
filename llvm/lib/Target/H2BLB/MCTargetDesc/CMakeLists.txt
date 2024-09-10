@@ -1,5 +1,6 @@
 add_llvm_component_library(LLVMH2BLBDesc
   H2BLBMCAsmInfo.cpp
+  H2BLBMCCodeEmitter.cpp
   H2BLBMCTargetDesc.cpp
   H2BLBInstPrinter.cpp
 

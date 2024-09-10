@@ -14,7 +14,15 @@
 #ifndef LLVM_LIB_TARGET_H2BLB_MCTARGETDESC_H2BLBMCTARGETDESC_H
 #define LLVM_LIB_TARGET_H2BLB_MCTARGETDESC_H2BLBMCTARGETDESC_H
 
+#include "llvm/MC/MCInstrInfo.h"
 #include <cstdint> // For int16_t and so on used in the .inc files.
+
+namespace llvm {
+class MCContext;
+class MCCodeEmitter;
+MCCodeEmitter *createH2BLBMCCodeEmitter(const MCInstrInfo &MCII,
+                                        MCContext &Ctx);
+} // end namespace llvm.
 
 // Defines symbolic names for H2BLB registers.  This defines a mapping from
 // register name to register number.

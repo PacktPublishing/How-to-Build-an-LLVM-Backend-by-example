@@ -9,6 +9,8 @@ tablegen(LLVM H2BLBGenInstrInfo.inc -gen-instr-info)
 tablegen(LLVM H2BLBGenAsmWriter.inc -gen-asm-writer)
 # .s to MCInst
 tablegen(LLVM H2BLBGenAsmMatcher.inc -gen-asm-matcher)
+# Encoding.
+tablegen(LLVM H2BLBGenMCCodeEmitter.inc -gen-emitter)
 
 add_public_tablegen_target(H2BLBCommonTableGen)
 

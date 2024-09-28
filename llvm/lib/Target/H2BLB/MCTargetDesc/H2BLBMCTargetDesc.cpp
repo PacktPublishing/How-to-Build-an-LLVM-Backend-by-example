@@ -33,6 +33,7 @@ using namespace llvm;
 
 #define GET_INSTRINFO_MC_DESC
 #define GET_INSTRINFO_MC_HELPERS
+#define ENABLE_INSTR_PREDICATE_VERIFIER
 #include "H2BLBGenInstrInfo.inc"
 
 static MCRegisterInfo *createH2BLBMCRegisterInfo(const Triple &Triple) {

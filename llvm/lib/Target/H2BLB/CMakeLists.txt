@@ -15,6 +15,9 @@ tablegen(LLVM H2BLBGenMCCodeEmitter.inc -gen-emitter)
 add_public_tablegen_target(H2BLBCommonTableGen)
 
 add_llvm_target(H2BLBCodeGen
+  # Technically the AsmPrinter could be its own library, but this is how
+  # most targets expose their AsmPrinter.
+  H2BLBAsmPrinter.cpp
   H2BLBISelLowering.cpp
   H2BLBSimpleConstantPropagation.cpp
   H2BLBSubtarget.cpp
@@ -29,6 +32,7 @@ add_llvm_target(H2BLBCodeGen
   H2BLBDesc
   H2BLBInfo
 
+  AsmPrinter
   CodeGen
   Core
   Passes

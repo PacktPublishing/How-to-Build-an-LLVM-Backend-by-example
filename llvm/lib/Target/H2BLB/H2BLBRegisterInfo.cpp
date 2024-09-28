@@ -21,11 +21,11 @@
 #include "H2BLBGenRegisterInfo.inc"
 using namespace llvm;
 
-H2BLBRegisterInfo::H2BLBRegisterInfo() : H2BLBGenRegisterInfo(Register()) {}
+H2BLBRegisterInfo::H2BLBRegisterInfo() : H2BLBGenRegisterInfo(H2BLB::R0) {}
 
 const MCPhysReg *
 H2BLBRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
-  return nullptr;
+  return CSR_SaveList;
 }
 
 BitVector H2BLBRegisterInfo::getReservedRegs(const MachineFunction &MF) const {

@@ -21,3 +21,6 @@ using namespace llvm;
 
 H2BLBTargetLowering::H2BLBTargetLowering(const TargetMachine &TM)
     : TargetLowering(TM) {}
+
+// Calling Convention Implementation
+#include "H2BLBGenCallingConv.inc"

@@ -19,6 +19,7 @@ namespace llvm {
 class Function;
 class Pass;
 class PassRegistry;
+class H2BLBTargetMachine;
 
 class H2BLBSimpleConstantPropagationNewPass
     : public llvm::PassInfoMixin<H2BLBSimpleConstantPropagationNewPass> {
@@ -29,5 +30,8 @@ public:
 
 void initializeH2BLBSimpleConstantPropagationPass(PassRegistry &);
 Pass *createH2BLBSimpleConstantPropagationPassForLegacyPM();
+
+void initializeH2BLBDAGToDAGISelLegacyPass(PassRegistry &);
+Pass *createH2BLBISelDAG(H2BLBTargetMachine &TM);
 } // end namespace llvm.
 #endif

@@ -107,7 +107,7 @@ H2BLBPassConfig::H2BLBPassConfig(LLVMTargetMachine &TM, PassManagerBase &PM)
     : TargetPassConfig(TM, PM) {}
 
 bool H2BLBPassConfig::addInstSelector() {
-  // TODO: We need to hook up the DAG selector here.
+  addPass(createH2BLBISelDAG(getH2BLBTargetMachine()));
   return false;
 }
 

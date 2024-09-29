@@ -12,6 +12,7 @@ tablegen(LLVM H2BLBGenAsmMatcher.inc -gen-asm-matcher)
 # Encoding.
 tablegen(LLVM H2BLBGenMCCodeEmitter.inc -gen-emitter)
 tablegen(LLVM H2BLBGenCallingConv.inc -gen-callingconv)
+tablegen(LLVM H2BLBGenDAGISel.inc -gen-dag-isel)
 
 add_public_tablegen_target(H2BLBCommonTableGen)
 
@@ -19,6 +20,7 @@ add_llvm_target(H2BLBCodeGen
   # Technically the AsmPrinter could be its own library, but this is how
   # most targets expose their AsmPrinter.
   H2BLBAsmPrinter.cpp
+  H2BLBISelDAGToDAG.cpp
   H2BLBISelLowering.cpp
   H2BLBSimpleConstantPropagation.cpp
   H2BLBSubtarget.cpp

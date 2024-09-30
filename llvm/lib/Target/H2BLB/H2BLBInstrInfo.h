@@ -13,6 +13,7 @@
 #ifndef LLVM_LIB_TARGET_H2BLB_H2BLBINSTRINFO_H
 #define LLVM_LIB_TARGET_H2BLB_H2BLBINSTRINFO_H
 
+#include "MCTargetDesc/H2BLBMCTargetDesc.h" // For all the opcodes' enum.
 #include "llvm/CodeGen/TargetInstrInfo.h"
 
 #define GET_INSTRINFO_HEADER

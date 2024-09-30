@@ -13,6 +13,7 @@ tablegen(LLVM H2BLBGenAsmMatcher.inc -gen-asm-matcher)
 tablegen(LLVM H2BLBGenMCCodeEmitter.inc -gen-emitter)
 tablegen(LLVM H2BLBGenCallingConv.inc -gen-callingconv)
 tablegen(LLVM H2BLBGenDAGISel.inc -gen-dag-isel)
+tablegen(LLVM H2BLBGenFastISel.inc -gen-fast-isel)
 
 add_public_tablegen_target(H2BLBCommonTableGen)
 
@@ -24,6 +25,7 @@ add_llvm_target(H2BLBCodeGen
   H2BLBISelLowering.cpp
   H2BLBSimpleConstantPropagation.cpp
   H2BLBSubtarget.cpp
+  H2BLBFastISel.cpp
   H2BLBFrameLowering.cpp
   H2BLBInstrInfo.cpp
   H2BLBRegisterInfo.cpp
@@ -39,6 +41,7 @@ add_llvm_target(H2BLBCodeGen
   CodeGen
   Core
   Passes
+  SelectionDAG
   Support
   Target
 

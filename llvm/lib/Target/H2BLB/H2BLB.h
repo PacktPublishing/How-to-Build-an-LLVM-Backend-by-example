@@ -17,9 +17,12 @@
 
 namespace llvm {
 class Function;
+class FunctionLoweringInfo;
+class FastISel;
+class H2BLBTargetMachine;
 class Pass;
 class PassRegistry;
-class H2BLBTargetMachine;
+class TargetLibraryInfo;
 
 class H2BLBSimpleConstantPropagationNewPass
     : public llvm::PassInfoMixin<H2BLBSimpleConstantPropagationNewPass> {
@@ -33,5 +36,10 @@ Pass *createH2BLBSimpleConstantPropagationPassForLegacyPM();
 
 void initializeH2BLBDAGToDAGISelLegacyPass(PassRegistry &);
 Pass *createH2BLBISelDAG(H2BLBTargetMachine &TM);
+namespace H2BLB {
+FastISel *createFastISel(FunctionLoweringInfo &FuncInfo,
+                         const TargetLibraryInfo *LibInfo);
+
+} // end namespace H2BLB.
 } // end namespace llvm.
 #endif

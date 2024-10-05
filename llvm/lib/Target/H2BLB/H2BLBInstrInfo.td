@@ -1,5 +1,10 @@
 include "H2BLBInstrFormats.td"
 
+// SelectionDAG target specific nodes.
+def H2BLBreturnglue : SDNode<"H2BLBISD::RETURN_GLUE", SDTNone,
+                             [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
+
+
 def ADDi16rr : H2BLBBinaryInstruction<"addi16",
                                       /*opcode=*/0,
                                       /*is32Bit=*/false>;

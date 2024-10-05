@@ -55,7 +55,7 @@ void H2BLBInstPrinter::printOperand(const MCInst *MI, unsigned OpNo,
 void H2BLBInstPrinter::printImm(const MCInst *MI, unsigned OpNo,
                                 raw_ostream &O) {
   const MCOperand &Op = MI->getOperand(OpNo);
-  markup(O, Markup::Immediate) << "#" << formatImm(Op.getImm());
+  markup(O, Markup::Immediate) << formatImm(Op.getImm());
 }
 
 void H2BLBInstPrinter::printRegName(raw_ostream &OS, MCRegister Reg) const {

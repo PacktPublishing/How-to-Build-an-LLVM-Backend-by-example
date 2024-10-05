@@ -8,4 +8,3 @@ define void @empty() {
   ; CHECK-NEXT:   RETURN implicit $r0
   ret void
 }
-

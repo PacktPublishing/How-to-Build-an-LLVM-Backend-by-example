@@ -257,6 +257,15 @@ ASM_FUNCTION_LOONGARCH_RE = re.compile(
     flags=(re.M | re.S),
 )
 
+ASM_FUNCTION_H2BLB_RE = re.compile(
+    r"\.type\s+_?(?P<func>[^,\n]+),@function\n"
+    r'^_?(?P=func):(?:[ \t]*#+[ \t]*@"?(?P=func)"?)?\n'
+    r"(?P<body>.*?)\n"  # (body of the function)
+    # This list is incomplete
+    r"^\s*(\.Lfunc_end[0-9]+:\n|\.section)",
+    flags=(re.M | re.S),
+)
+
 SCRUB_X86_SHUFFLES_RE = re.compile(
     r"^(\s*\w+) [^#\n]+#+ ((?:[xyz]mm\d+|mem)( \{%k\d+\}( \{z\})?)? = .*)$", flags=re.M
 )
@@ -525,6 +534,16 @@ def scrub_asm_loongarch(asm, args):
     asm = common.SCRUB_TRAILING_WHITESPACE_RE.sub(r"", asm)
     return asm
 
+def scrub_asm_h2blb(asm, args):
+    # Scrub runs of whitespace out of the assembly, but leave the leading
+    # whitespace in place.
+    asm = common.SCRUB_WHITESPACE_RE.sub(r" ", asm)
+    # Expand the tabs used for indentation.
+    asm = string.expandtabs(asm, 2)
+    # Strip trailing whitespace.
+    asm = common.SCRUB_TRAILING_WHITESPACE_RE.sub(r"", asm)
+    return asm
+
 
 # Returns a tuple of a scrub function and a function regex. Scrub function is
 # used to alter function body in some way, for example, remove trailing spaces.
@@ -579,6 +598,7 @@ def get_run_handler(triple):
         "nvptx": (scrub_asm_nvptx, ASM_FUNCTION_NVPTX_RE),
         "loongarch32": (scrub_asm_loongarch, ASM_FUNCTION_LOONGARCH_RE),
         "loongarch64": (scrub_asm_loongarch, ASM_FUNCTION_LOONGARCH_RE),
+        "h2blb": (scrub_asm_h2blb, ASM_FUNCTION_H2BLB_RE),
     }
     handler = None
     best_prefix = ""

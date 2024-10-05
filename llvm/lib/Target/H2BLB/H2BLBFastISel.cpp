@@ -26,6 +26,8 @@ private:
   // Selection routines.
   bool selectRet(const Instruction &I);
 
+  bool fastLowerArguments() override;
+
 public:
   // Backend specific FastISel code.
   explicit H2BLBFastISel(FunctionLoweringInfo &FuncInfo,
@@ -78,4 +80,20 @@ FastISel *H2BLB::createFastISel(FunctionLoweringInfo &FuncInfo,
                                 const TargetLibraryInfo *LibInfo) {
 
   return new H2BLBFastISel(FuncInfo, LibInfo);
+}
+
+bool H2BLBFastISel::fastLowerArguments() {
+  if (!FuncInfo.CanLowerReturn)
+    return false;
+
+  const Function *F = FuncInfo.Fn;
+  if (F->isVarArg())
+    return false;
+
+  CallingConv::ID CC = F->getCallingConv();
+  if (CC != CallingConv::C && CC != CallingConv::Fast)
+    return false;
+
+  // Success only if there are no argument to lower.
+  return F->args().empty();
 }

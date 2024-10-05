@@ -18,17 +18,35 @@
 
 namespace llvm {
 
+namespace H2BLBISD {
+enum NodeType : unsigned {
+  FIRST_NUMBER = ISD::BUILTIN_OP_END,
+  RETURN_GLUE,
+};
+}
+
 class H2BLBSubtarget;
 class H2BLBTargetMachine;
 
 class H2BLBTargetLowering : public TargetLowering {
+  const H2BLBSubtarget &Subtarget;
+
 public:
-  explicit H2BLBTargetLowering(const TargetMachine &TM);
+  explicit H2BLBTargetLowering(const TargetMachine &TM,
+                               const H2BLBSubtarget &STI);
 
   /// This method returns a target specific FastISel object, or null if the
   /// target does not support "fast" ISel.
   FastISel *createFastISel(FunctionLoweringInfo &funcInfo,
                            const TargetLibraryInfo *libInfo) const override;
+
+  SDValue LowerReturn(SDValue Chain, CallingConv::ID CallConv, bool IsVarArg,
+                      const SmallVectorImpl<ISD::OutputArg> &Outs,
+                      const SmallVectorImpl<SDValue> &OutVals, const SDLoc &DL,
+                      SelectionDAG &DAG) const override;
+
+  // This method returns the name of a target specific DAG node.
+  const char *getTargetNodeName(unsigned Opcode) const override;
 };
 } // end namespace llvm
 

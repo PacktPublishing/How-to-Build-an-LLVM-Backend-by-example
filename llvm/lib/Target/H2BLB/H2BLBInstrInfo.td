@@ -25,6 +25,7 @@ def LD16imm7 : H2BLBInstruction<"ldi16", "$dst, $imm7",
   bits<7> imm7;
   let Inst{9-7} = dst;
   let Inst{6-0} = imm7;
+  let Pattern = [(set GPR16:$dst, uimm7:$imm7)];
 }
 
 def LD16imm16 : H2BLBPseudoInstruction<(outs GPR16:$dst), (ins i16imm:$src),

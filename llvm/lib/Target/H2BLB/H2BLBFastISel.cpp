@@ -134,6 +134,72 @@ bool H2BLBFastISel::fastLowerArguments() {
   if (CC != CallingConv::C && CC != CallingConv::Fast)
     return false;
 
-  // Success only if there are no argument to lower.
-  return F->args().empty();
+  // If we have more than one i32 + one i16, or three i16, we can't lower
+  // with registers alone.
+  const DataLayout &DL = F->getDataLayout();
+  unsigned Nb16BitValues = 0;
+  unsigned Nb32BitValues = 0;
+  for (const Argument &Arg : F->args()) {
+    Type *ArgTy = Arg.getType();
+    TypeSize TySize = DL.getTypeSizeInBits(ArgTy);
+    switch (TySize) {
+    case 16:
+      ++Nb16BitValues;
+      break;
+    case 32:
+      ++Nb32BitValues;
+      break;
+    default:
+      return false;
+    }
+  }
+
+  // Check that we would have enough registers to fit everything.
+  if (Nb32BitValues > 1)
+    return false;
+
+  Nb16BitValues += Nb32BitValues * 2;
+  if (Nb16BitValues > 3)
+    return false;
+
+  static const MCPhysReg GPR16Registers[] = {H2BLB::R1, H2BLB::R2, H2BLB::R3};
+  static const MCPhysReg GPR32Registers[] = {H2BLB::D1};
+
+  MachineFunction &MF = *FuncInfo.MF;
+  uint64_t NextAvailableGPR16 = 0;
+  uint64_t NextAvailableGPR32 = 0;
+  for (const Argument &Arg : F->args()) {
+    Type *ArgTy = Arg.getType();
+    TypeSize TySize = DL.getTypeSizeInBits(ArgTy);
+    Register SrcPhysReg;
+    const TargetRegisterClass *DstRC;
+    switch (TySize) {
+    case 16:
+      assert(NextAvailableGPR16 <
+                 sizeof(GPR16Registers) / sizeof(GPR16Registers[0]) &&
+             "out-of-bound");
+      SrcPhysReg = GPR16Registers[NextAvailableGPR16++];
+      DstRC = &H2BLB::GPR16RegClass;
+      break;
+    case 32:
+      assert(NextAvailableGPR32 <
+                 sizeof(GPR32Registers) / sizeof(GPR32Registers[0]) &&
+             "out-of-bound");
+      SrcPhysReg = GPR32Registers[NextAvailableGPR32++];
+      DstRC = &H2BLB::GPR32RegClass;
+      break;
+    default:
+      llvm_unreachable("this should have been filtered out before");
+    }
+
+    // This is a quirk of how SDISel connect with FastISel.
+    Register SrcReg = MF.addLiveIn(SrcPhysReg, DstRC);
+    Register ResultReg = createResultReg(DstRC);
+    BuildMI(*FuncInfo.MBB, FuncInfo.InsertPt, MIMD, TII.get(TargetOpcode::COPY),
+            ResultReg)
+        .addReg(SrcReg, getKillRegState(true));
+    updateValueMap(&Arg, ResultReg);
+  }
+
+  return true;
 }

@@ -26,3 +26,80 @@ define i16 @retCst() {
   ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
   ret i16 132
 }
+
+define i16 @oneArgi16(i16 %arg) {
+  ; CHECK-LABEL: name: oneArgi16
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY killed [[COPY]]
+  ; CHECK-NEXT:   $r1 = COPY [[COPY1]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  ret i16 %arg
+}
+
+define half @oneArgHalf(half %arg) {
+  ; CHECK-LABEL: name: oneArgHalf
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY killed [[COPY]]
+  ; CHECK-NEXT:   $r1 = COPY [[COPY1]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  ret half %arg
+}
+
+define i32 @oneArgi32(i32 %arg) {
+  ; CHECK-LABEL: name: oneArgi32
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $d1
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr32 = COPY $d1
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr32 = COPY killed [[COPY]]
+  ; CHECK-NEXT:   $d1 = COPY [[COPY1]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $d1
+  ret i32 %arg
+}
+
+define void @twoArgsi32i16(i32 %arg, i16 %arg1) {
+  ; CHECK-LABEL: name: twoArgsi32i16
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $d1, $r1
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr32 = COPY $d1
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr32 = COPY killed [[COPY1]]
+  ; CHECK-NEXT:   [[COPY3:%[0-9]+]]:gpr16 = COPY killed [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0
+  ret void
+}
+
+define void @twoArgsi16i32(i16 %arg, i32 %arg1) {
+  ; CHECK-LABEL: name: twoArgsi16i32
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1, $d1
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr32 = COPY $d1
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr16 = COPY killed [[COPY1]]
+  ; CHECK-NEXT:   [[COPY3:%[0-9]+]]:gpr32 = COPY killed [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0
+  ret void
+}
+
+define void @threeArgsi16(i16 %arg, i16 %arg1, i16 %arg2) {
+  ; CHECK-LABEL: name: threeArgsi16
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1, $r2, $r3
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r3
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r2
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   [[COPY3:%[0-9]+]]:gpr16 = COPY killed [[COPY2]]
+  ; CHECK-NEXT:   [[COPY4:%[0-9]+]]:gpr16 = COPY killed [[COPY1]]
+  ; CHECK-NEXT:   [[COPY5:%[0-9]+]]:gpr16 = COPY killed [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0
+  ret void
+}

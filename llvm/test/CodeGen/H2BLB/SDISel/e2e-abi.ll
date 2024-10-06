@@ -16,3 +16,40 @@ define i16 @retCstInRange() {
 ; CHECK-NEXT:    ret
   ret i16 11
 }
+
+define i16 @oneArgi16(i16 %arg) {
+; CHECK-LABEL: oneArgi16:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
+  ret i16 %arg
+}
+
+define half @oneArgHalf(half %arg) {
+; CHECK-LABEL: oneArgHalf:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
+  ret half %arg
+}
+
+define i32 @oneArgi32(i32 %arg) {
+; CHECK-LABEL: oneArgi32:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
+  ret i32 %arg
+}
+
+define <2 x i16> @oneArgv2i16(<2 x i16> %arg) {
+; CHECK-LABEL: oneArgv2i16:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
+  ret <2 x i16> %arg
+}
+
+define <2 x i16> @twoArgsi16(i16 %arg, i16 %arg1) {
+; CHECK-LABEL: twoArgsi16:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
+  %partial = insertelement <2 x i16> poison, i16 %arg, i32 0
+  %res = insertelement <2 x i16> %partial, i16 %arg1, i32 1
+  ret <2 x i16> %res
+}

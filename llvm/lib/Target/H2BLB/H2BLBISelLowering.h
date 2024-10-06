@@ -40,6 +40,16 @@ public:
   FastISel *createFastISel(FunctionLoweringInfo &funcInfo,
                            const TargetLibraryInfo *libInfo) const override;
 
+  /// This hook must be implemented to lower the incoming (formal) arguments,
+  /// described by the Ins array, into the specified DAG. The implementation
+  /// should fill in the InVals array with legal-type argument values, and
+  /// return the resulting token chain value.
+  SDValue LowerFormalArguments(SDValue Chain, CallingConv::ID CallConv,
+                               bool IsVarArg,
+                               const SmallVectorImpl<ISD::InputArg> &Ins,
+                               const SDLoc &DL, SelectionDAG &DAG,
+                               SmallVectorImpl<SDValue> &InVals) const override;
+
   SDValue LowerReturn(SDValue Chain, CallingConv::ID CallConv, bool IsVarArg,
                       const SmallVectorImpl<ISD::OutputArg> &Outs,
                       const SmallVectorImpl<SDValue> &OutVals, const SDLoc &DL,

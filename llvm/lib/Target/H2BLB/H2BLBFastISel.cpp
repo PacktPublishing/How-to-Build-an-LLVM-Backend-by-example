@@ -70,11 +70,49 @@ bool H2BLBFastISel::selectRet(const Instruction &I) {
   if (TLI.supportSplitCSR(FuncInfo.MF))
     return false;
 
-  const ReturnInst &Ret = cast<ReturnInst>(I);
-  if (Ret.getNumOperands() > 0)
-    return false;
+  // Build a list of return value registers.
+  SmallVector<Register, 4> RetRegs;
 
-  BuildMI(*FuncInfo.MBB, FuncInfo.InsertPt, MIMD, TII.get(H2BLB::RETURN));
+  const ReturnInst &Ret = cast<ReturnInst>(I);
+  if (Ret.getNumOperands() > 0) {
+    SmallVector<CCValAssign> RetValLocs;
+    MachineFunction &MF = *FuncInfo.MF;
+    CallingConv::ID CCID = F.getCallingConv();
+
+    CCState CCInfo(CCID, F.isVarArg(), MF, RetValLocs, Ret.getContext());
+
+    SmallVector<ISD::OutputArg, 4> Outs;
+
+    GetReturnInfo(CCID, F.getReturnType(), F.getAttributes(), Outs, TLI, DL);
+    CCInfo.AnalyzeReturn(Outs, RetCC_H2BLB_Common);
+
+    // Copy the result values into the output registers.
+    for (size_t i = 0; i != RetValLocs.size(); ++i) {
+      CCValAssign &VA = RetValLocs[i];
+      if (!VA.isRegLoc() || VA.getLocInfo() != CCValAssign::Full)
+        return false;
+
+      const Value *RV = Ret.getReturnValue();
+      Register SrcReg = getRegForValue(RV);
+      if (SrcReg == H2BLB::NoRegister)
+        return false;
+
+      Register DestReg = VA.getLocReg();
+      // Copy the virtual register to the desired physical register.
+      BuildMI(*FuncInfo.MBB, FuncInfo.InsertPt, MIMD,
+              TII.get(TargetOpcode::COPY), DestReg)
+          .addReg(SrcReg);
+
+      RetRegs.push_back(VA.getLocReg());
+    }
+  }
+
+  MachineInstrBuilder MIB =
+      BuildMI(*FuncInfo.MBB, FuncInfo.InsertPt, MIMD, TII.get(H2BLB::RETURN));
+
+  for (Register RetReg : RetRegs)
+    MIB.addReg(RetReg, RegState::Implicit);
+
   return true;
 }
 

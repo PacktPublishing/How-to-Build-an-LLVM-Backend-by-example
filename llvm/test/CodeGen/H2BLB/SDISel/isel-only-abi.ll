@@ -31,3 +31,64 @@ define i16 @retCst() {
   ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
   ret i16 132
 }
+
+define i16 @oneArgi16(i16 %arg) {
+  ; CHECK-LABEL: name: oneArgi16
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   $r1 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  ret i16 %arg
+}
+
+define half @oneArgHalf(half %arg) {
+  ; CHECK-LABEL: name: oneArgHalf
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   $r1 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  ret half %arg
+}
+
+define i32 @oneArgi32(i32 %arg) {
+  ; CHECK-LABEL: name: oneArgi32
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $d1
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr32 = COPY $d1
+  ; CHECK-NEXT:   $d1 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $d1
+  ret i32 %arg
+}
+
+define <2 x i16> @oneArgv2i16(<2 x i16> %arg) {
+  ; CHECK-LABEL: name: oneArgv2i16
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1, $r2
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r2
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   $r1 = COPY [[COPY1]]
+  ; CHECK-NEXT:   $r2 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1, implicit $r2
+  ret <2 x i16> %arg
+}
+
+define <2 x i16> @twoArgsi16(i16 %arg, i16 %arg1) {
+  ; CHECK-LABEL: name: twoArgsi16
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1, $r2
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r2
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   $r1 = COPY [[COPY1]]
+  ; CHECK-NEXT:   $r2 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1, implicit $r2
+  %partial = insertelement <2 x i16> poison, i16 %arg, i32 0
+  %res = insertelement <2 x i16> %partial, i16 %arg1, i32 1
+  ret <2 x i16> %res
+}

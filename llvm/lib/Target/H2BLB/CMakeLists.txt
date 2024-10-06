@@ -21,6 +21,7 @@ add_llvm_target(H2BLBCodeGen
   # Technically the AsmPrinter could be its own library, but this is how
   # most targets expose their AsmPrinter.
   H2BLBAsmPrinter.cpp
+  H2BLBCallingConvention.cpp
   H2BLBISelDAGToDAG.cpp
   H2BLBISelLowering.cpp
   H2BLBSimpleConstantPropagation.cpp

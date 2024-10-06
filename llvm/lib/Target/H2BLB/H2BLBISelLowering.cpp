@@ -81,6 +81,15 @@ H2BLBTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
   return DAG.getNode(H2BLBISD::RETURN_GLUE, DL, MVT::Other, RetOps);
 }
 
+SDValue H2BLBTargetLowering::LowerFormalArguments(
+    SDValue Chain, CallingConv::ID CallConv, bool IsVarArg,
+    const SmallVectorImpl<ISD::InputArg> &Ins, const SDLoc &DL,
+    SelectionDAG &DAG, SmallVectorImpl<SDValue> &InVals) const {
+  if (!Ins.empty())
+    return SDValue();
+  return Chain;
+}
+
 const char *H2BLBTargetLowering::getTargetNodeName(unsigned Opcode) const {
   switch ((H2BLBISD::NodeType)Opcode) {
   case H2BLBISD::FIRST_NUMBER:

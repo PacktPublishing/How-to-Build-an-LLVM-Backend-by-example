@@ -8,3 +8,45 @@ define void @empty() {
 ; CHECK-NEXT:    ret
   ret void
 }
+
+define i16 @oneArgi16(i16 %arg) {
+; CHECK-LABEL: oneArgi16:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
+  ret i16 %arg
+}
+
+define half @oneArgHalf(half %arg) {
+; CHECK-LABEL: oneArgHalf:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
+  ret half %arg
+}
+
+define i32 @oneArgi32(i32 %arg) {
+; CHECK-LABEL: oneArgi32:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
+  ret i32 %arg
+}
+
+define void @twoArgsi32i16(i32 %arg, i16 %arg1) {
+; CHECK-LABEL: twoArgsi32i16:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
+  ret void
+}
+
+define void @twoArgsi16i32(i16 %arg, i32 %arg1) {
+; CHECK-LABEL: twoArgsi16i32:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
+  ret void
+}
+
+define void @threeArgsi16(i16 %arg, i16 %arg1, i16 %arg2) {
+; CHECK-LABEL: threeArgsi16:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
+  ret void
+}

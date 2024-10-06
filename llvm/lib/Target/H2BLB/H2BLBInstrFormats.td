@@ -22,6 +22,15 @@ class H2BLBInstruction<string asm, string operands,
   // oops and iops are handled by the other classes.
 }
 
+// Pseudo instructions (don't have encoding information) and must
+// disappear before the MC layer.
+class H2BLBPseudoInstruction<dag oops, dag iops, list<dag> pattern>
+    : H2BLBInstruction</*asm=*/"", /*operands=*/"", 0, 0, oops, iops> {
+  let Pattern        = pattern;
+  let isCodeGenOnly  = 1;
+  let isPseudo       = 1;
+}
+
 class H2BLBBinaryInstruction<string asm,
                              bits<5> opcode = 0,
                              bit is32Bit = 0,

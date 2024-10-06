@@ -8,3 +8,11 @@ define void @empty() {
 ; CHECK-NEXT:    ret
   ret void
 }
+
+define i16 @retCstInRange() {
+; CHECK-LABEL: retCstInRange:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ldi16 r1, 11
+; CHECK-NEXT:    ret
+  ret i16 11
+}

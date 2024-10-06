@@ -8,3 +8,21 @@ define void @empty() {
   ; CHECK-NEXT:   RETURN implicit $r0
   ret void
 }
+
+define i16 @retCstInRange() {
+  ; CHECK-LABEL: name: retCstInRange
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   [[LD16imm16_:%[0-9]+]]:gpr16 = LD16imm16 11
+  ; CHECK-NEXT:   $r1 = COPY [[LD16imm16_]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  ret i16 11
+}
+
+define i16 @retCst() {
+  ; CHECK-LABEL: name: retCst
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   [[LD16imm16_:%[0-9]+]]:gpr16 = LD16imm16 132
+  ; CHECK-NEXT:   $r1 = COPY [[LD16imm16_]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  ret i16 132
+}

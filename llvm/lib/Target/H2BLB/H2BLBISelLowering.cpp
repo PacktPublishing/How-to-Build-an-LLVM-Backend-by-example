@@ -25,7 +25,9 @@ H2BLBTargetLowering::H2BLBTargetLowering(const TargetMachine &TM,
                                          const H2BLBSubtarget &STI)
     : TargetLowering(TM), Subtarget(STI) {
   addRegisterClass(MVT::i16, &H2BLB::GPR16RegClass);
+  addRegisterClass(MVT::f16, &H2BLB::GPR16RegClass);
   addRegisterClass(MVT::i32, &H2BLB::GPR32RegClass);
+  addRegisterClass(MVT::f32, &H2BLB::GPR32RegClass);
 
   // Tell the generic implementation that we are done with setting up our
   // register classes.
@@ -85,8 +87,51 @@ SDValue H2BLBTargetLowering::LowerFormalArguments(
     SDValue Chain, CallingConv::ID CallConv, bool IsVarArg,
     const SmallVectorImpl<ISD::InputArg> &Ins, const SDLoc &DL,
     SelectionDAG &DAG, SmallVectorImpl<SDValue> &InVals) const {
-  if (!Ins.empty())
-    return SDValue();
+  if (IsVarArg)
+    report_fatal_error("variadic functions, not yet implemented");
+
+  MachineFunction &MF = DAG.getMachineFunction();
+  if (MF.getFunction().hasStructRetAttr())
+    report_fatal_error("aggregate returns, not yet implemented");
+
+  MachineRegisterInfo &RegInfo = MF.getRegInfo();
+
+  // Assign locations to all of the incoming arguments.
+  SmallVector<CCValAssign, 16> ArgLocs;
+  CCState CCInfo(CallConv, IsVarArg, MF, ArgLocs, *DAG.getContext());
+  CCInfo.AnalyzeFormalArguments(Ins, CC_H2BLB_Common);
+
+  for (size_t I = 0; I < ArgLocs.size(); ++I) {
+    auto &VA = ArgLocs[I];
+
+    if (VA.isRegLoc()) {
+      if (VA.getLocInfo() != CCValAssign::Full)
+        report_fatal_error("partial type, not yet implemented");
+
+      // Arguments passed in registers
+      EVT RegVT = VA.getLocVT();
+      TypeSize TySizeInBits = RegVT.getSizeInBits();
+      const TargetRegisterClass *DstRC = nullptr;
+      switch (TySizeInBits) {
+      default:
+        report_fatal_error("argument type, not yet implemented");
+      case 16:
+        DstRC = &H2BLB::GPR16RegClass;
+        break;
+      case 32:
+        DstRC = &H2BLB::GPR32RegClass;
+        break;
+      }
+      Register VReg = RegInfo.createVirtualRegister(DstRC);
+      RegInfo.addLiveIn(VA.getLocReg(), VReg);
+      SDValue ArgValue = DAG.getCopyFromReg(Chain, DL, VReg, RegVT);
+
+      InVals.push_back(ArgValue);
+    } else {
+      report_fatal_error("non-reg argument, not yet implemented");
+    }
+  }
+
   return Chain;
 }
 

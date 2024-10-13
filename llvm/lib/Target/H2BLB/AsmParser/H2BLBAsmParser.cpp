@@ -386,13 +386,18 @@ bool H2BLBAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
     }
 
     return Error(ErrorLoc, "invalid operand for instruction");
-  case Match_InvalidImm0_127:
     // Any time we get here, there's nothing fancy to do. Just get the
     // operand SMLoc and display the diagnostic.
-    ErrorLoc = ((H2BLBOperand &)*Operands[ErrorInfo]).getStartLoc();
-    if (ErrorLoc == SMLoc())
-      ErrorLoc = IDLoc;
-    return Error(ErrorLoc, "immediate must be an integer in range [0, 127].");
+#define Match_InvalidImm(LowerBound, UpperBound)                               \
+  case Match_InvalidImm##LowerBound##_##UpperBound:                            \
+    ErrorLoc = ((H2BLBOperand &)*Operands[ErrorInfo]).getStartLoc();           \
+    if (ErrorLoc == SMLoc())                                                   \
+      ErrorLoc = IDLoc;                                                        \
+    return Error(ErrorLoc,                                                     \
+                 "immediate must be an integer in range [" #LowerBound         \
+                 ", " #UpperBound "].")
+    Match_InvalidImm(0, 127);
+    Match_InvalidImm(0, 15);
   }
 
   llvm_unreachable("Unknown match type detected!");

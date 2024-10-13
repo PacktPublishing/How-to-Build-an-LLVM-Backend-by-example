@@ -65,3 +65,9 @@ class AsmImmRange<int Low, int High> : AsmOperandClass {
 def uimm7 : Operand<i16>, ImmLeaf<i16, [{return Imm >= 0 && Imm < 128;}]> {
   let ParserMatchClass = AsmImmRange<0, 127>;
 }
+
+def uimm4 : Operand<i16>, ImmLeaf<i16, [{return Imm >= 0 && Imm < 16;}]> {
+  let ParserMatchClass = AsmImmRange<0, 15>;
+}
+
+def addrmode : ComplexPattern<iPTR, 2, "selectAddrMode", []>;

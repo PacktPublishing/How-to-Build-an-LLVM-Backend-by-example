@@ -17,6 +17,8 @@
 #include "H2BLBSubtarget.h"
 #include "H2BLBTargetMachine.h"
 
+#include "llvm/CodeGen/MachineFrameInfo.h"
+
 using namespace llvm;
 
 #define DEBUG_TYPE "h2blb-lowering"
@@ -95,6 +97,7 @@ SDValue H2BLBTargetLowering::LowerFormalArguments(
     report_fatal_error("aggregate returns, not yet implemented");
 
   MachineRegisterInfo &RegInfo = MF.getRegInfo();
+  MachineFrameInfo &MFI = MF.getFrameInfo();
 
   // Assign locations to all of the incoming arguments.
   SmallVector<CCValAssign, 16> ArgLocs;
@@ -103,6 +106,7 @@ SDValue H2BLBTargetLowering::LowerFormalArguments(
 
   for (size_t I = 0; I < ArgLocs.size(); ++I) {
     auto &VA = ArgLocs[I];
+    SDValue ArgValue;
 
     if (VA.isRegLoc()) {
       if (VA.getLocInfo() != CCValAssign::Full)
@@ -124,12 +128,32 @@ SDValue H2BLBTargetLowering::LowerFormalArguments(
       }
       Register VReg = RegInfo.createVirtualRegister(DstRC);
       RegInfo.addLiveIn(VA.getLocReg(), VReg);
-      SDValue ArgValue = DAG.getCopyFromReg(Chain, DL, VReg, RegVT);
+      ArgValue = DAG.getCopyFromReg(Chain, DL, VReg, RegVT);
 
-      InVals.push_back(ArgValue);
     } else {
-      report_fatal_error("non-reg argument, not yet implemented");
+      assert(VA.isMemLoc() && "CCValAssign is neither reg nor mem");
+      unsigned ArgOffset = VA.getLocMemOffset();
+      if (VA.getLocInfo() != CCValAssign::Full)
+        report_fatal_error("support only value directly in the stack");
+      unsigned ArgSize = VA.getValVT().getSizeInBits() / 8;
+
+      int FrameIdx =
+          MFI.CreateFixedObject(ArgSize, ArgOffset, /*IsImmutable=*/true);
+
+      // Create load nodes to retrieve arguments from the stack.
+      SDValue FrameIdxNode =
+          DAG.getFrameIndex(FrameIdx, getPointerTy(DAG.getDataLayout()));
+      MachinePointerInfo PtrInfo =
+          MachinePointerInfo::getFixedStack(MF, FrameIdx);
+
+      // We support only full loads for now, so no extension whatsoever.
+      ISD::LoadExtType ExtType = ISD::NON_EXTLOAD;
+      MVT MemVT = VA.getValVT();
+
+      ArgValue = DAG.getExtLoad(ExtType, DL, VA.getLocVT(), Chain, FrameIdxNode,
+                                PtrInfo, MemVT);
     }
+    InVals.push_back(ArgValue);
   }
 
   return Chain;

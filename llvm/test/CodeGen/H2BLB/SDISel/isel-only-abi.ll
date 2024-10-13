@@ -92,3 +92,13 @@ define <2 x i16> @twoArgsi16(i16 %arg, i16 %arg1) {
   %res = insertelement <2 x i16> %partial, i16 %arg1, i32 1
   ret <2 x i16> %res
 }
+
+; The fourth i16 argument is expected to be passed through a stack slot.
+define i16 @fourArgsi16(i16 %arg, i16 %arg1, i16 %arg2, i16 %arg3) {
+  ; CHECK-LABEL: name: fourArgsi16
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   [[LDR16_:%[0-9]+]]:gpr16 = LDR16 %fixed-stack.0, 0 :: (load (s16) from %fixed-stack.0, align 8)
+  ; CHECK-NEXT:   $r1 = COPY [[LDR16_]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  ret i16 %arg3
+}

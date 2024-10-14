@@ -10,6 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "MCTargetDesc/H2BLBMCFixups.h"
 #include "MCTargetDesc/H2BLBMCTargetDesc.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/MC/MCCodeEmitter.h"
@@ -69,8 +70,24 @@ H2BLBMCCodeEmitter::getMachineOpValue(const MCInst &MI, const MCOperand &MO,
                                       const MCSubtargetInfo &STI) const {
   if (MO.isReg())
     return MCCtxt.getRegisterInfo()->getEncodingValue(MO.getReg());
-  assert(MO.isImm() && "Unsupported operand type");
-  return static_cast<unsigned>(MO.getImm());
+  if (MO.isImm())
+    return static_cast<unsigned>(MO.getImm());
+
+  // At this point we expect a symbol reference for the branches.
+  assert(MO.isExpr());
+  const MCExpr *Expr = MO.getExpr();
+  assert(Expr->getKind() == MCExpr::SymbolRef);
+
+  if (MI.getOpcode() == H2BLB::CALL) {
+    // FIXME: At this point we have to issue a fixup, but we need the
+    // MCAsmBackend to do that, which we don't have.
+    // Just do nothing for now.
+    // Fixups.push_back(MCFixup::create(0, Expr,
+    // (MCFixupKind)H2BLB::FK_H2BLB_PCRel_11));
+  } else
+    llvm_unreachable("We don't have any operation with symbols");
+
+  return 0;
 }
 
 void H2BLBMCCodeEmitter::encodeInstruction(const MCInst &MI,

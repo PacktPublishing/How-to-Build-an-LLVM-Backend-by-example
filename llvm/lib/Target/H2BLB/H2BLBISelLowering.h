@@ -21,6 +21,7 @@ namespace llvm {
 namespace H2BLBISD {
 enum NodeType : unsigned {
   FIRST_NUMBER = ISD::BUILTIN_OP_END,
+  CALL,
   RETURN_GLUE,
 };
 }

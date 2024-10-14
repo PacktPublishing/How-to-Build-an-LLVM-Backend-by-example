@@ -192,6 +192,8 @@ const char *H2BLBTargetLowering::getTargetNodeName(unsigned Opcode) const {
     break;
   case H2BLBISD::RETURN_GLUE:
     return "H2BLBISD::RETURN_GLUE";
+  case H2BLBISD::CALL:
+    return "H2BLBISD::CALL";
   }
   return nullptr;
 }

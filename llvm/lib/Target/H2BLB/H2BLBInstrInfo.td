@@ -3,6 +3,29 @@ include "H2BLBInstrFormats.td"
 // SelectionDAG target specific nodes.
 def H2BLBreturnglue : SDNode<"H2BLBISD::RETURN_GLUE", SDTNone,
                              [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
+def H2BLBcallseq_start : SDNode<"ISD::CALLSEQ_START",
+                                // Two arguments:
+                                // Number of bytes allocated within the
+                                // callseq_start/end region and the number
+                                // of bytes allocated outside.
+                                SDCallSeqStart<[ SDTCisVT<0, i32>,
+                                                 SDTCisVT<1, i32> ]>,
+                                [SDNPHasChain, SDNPOutGlue]>;
+def H2BLBcallseq_end : SDNode<"ISD::CALLSEQ_END",
+                              // Same arguments as callseq_start.
+                              SDCallSeqEnd<[ SDTCisVT<0, i32>,
+                                             SDTCisVT<1, i32> ]>,
+                              [SDNPHasChain, SDNPOptInGlue, SDNPOutGlue]>;
+def H2BLBcall : SDNode<"H2BLBISD::CALL",
+                       // Type profile:
+                       // 0: no result.
+                       // -1: a variadic number of inputs.
+                       // The first operand must be a pointer (to the call
+                       // target)
+                       SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>,
+                       [SDNPHasChain, SDNPOptInGlue, SDNPOutGlue,
+                        SDNPVariadic]>;
+
 
 
 def ADDi16rr : H2BLBBinaryInstruction<"addi16",
@@ -55,4 +78,13 @@ def CALL : H2BLBInstruction<"call", "$tgt",
                                  /*iops=*/(ins i16imm:$tgt)> {
   bits<11> tgt;
   let Inst{10-0} = tgt;
+}
+
+let hasSideEffects = 1, isCodeGenOnly = 1 in {
+let Defs = [SP], Uses = [SP] in {
+def ADJCALLSTACKDOWN : H2BLBPseudoInstruction<(outs), (ins i32imm:$amt1, i32imm:$amt2),
+                              [(H2BLBcallseq_start timm:$amt1, timm:$amt2)]>;
+def ADJCALLSTACKUP : H2BLBPseudoInstruction<(outs), (ins i32imm:$amt1, i32imm:$amt2),
+                            [(H2BLBcallseq_end timm:$amt1, timm:$amt2)]>;
+}
 }

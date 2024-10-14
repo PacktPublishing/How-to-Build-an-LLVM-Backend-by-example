@@ -46,3 +46,13 @@ def LDR16 : H2BLBInstruction<"ldr16", "$dst, $addr, $offset",
   let Inst{3-0} = offset;
   let Pattern = [(set GPR16:$dst, (load (addrmode GPR16:$addr, uimm4:$offset)))];
 }
+
+let isCall = 1, Defs = [R0], Uses = [SP] in
+def CALL : H2BLBInstruction<"call", "$tgt",
+                                 /*opcode=*/0b00100,
+                                 /*is32Bit=*/0,
+                                 /*oops=*/(outs),
+                                 /*iops=*/(ins i16imm:$tgt)> {
+  bits<11> tgt;
+  let Inst{10-0} = tgt;
+}

@@ -17,6 +17,7 @@
 #include "llvm/CodeGen/MachineFunction.h"
 #include "llvm/CodeGen/MachineInstrBuilder.h"
 #include "llvm/CodeGen/MachineRegisterInfo.h"
+#include "llvm/Support/Error.h"
 
 using namespace llvm;
 
@@ -51,4 +52,23 @@ void H2BLBFrameLowering::emitEpilogue(MachineFunction &MF,
         .addReg(H2BLB::SP)
         .addImm(NumBytes);
   }
+}
+
+MachineBasicBlock::iterator H2BLBFrameLowering::eliminateCallFramePseudoInstr(
+    MachineFunction &MF, MachineBasicBlock &MBB,
+    MachineBasicBlock::iterator MI) const {
+  const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo();
+  unsigned Opc = MI->getOpcode();
+
+  if (Opc != TII->getCallFrameSetupOpcode() &&
+      Opc != TII->getCallFrameDestroyOpcode())
+    report_fatal_error("Unexpected frame pseudo instruction");
+
+  if (MI->getOperand(0).getImm() != 0)
+    report_fatal_error("Proper frame lowering not yet implemented");
+
+  if (MI->getOperand(1).getImm() != 0)
+    report_fatal_error("Callee pop count not supported");
+
+  return MBB.erase(MI);
 }

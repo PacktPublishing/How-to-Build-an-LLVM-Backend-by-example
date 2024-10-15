@@ -56,6 +56,18 @@ public:
                       const SmallVectorImpl<SDValue> &OutVals, const SDLoc &DL,
                       SelectionDAG &DAG) const override;
 
+  /// Lower the arguments and resutls of a call (from the caller perspective)
+  /// as described by \p CLI.
+  /// The resulting values from the callee are fed in \p InVals.
+  /// The lowering consists in the classic:
+  /// CALLSEQ_START
+  /// arg setup (as described by CLI.Outs and CLI.OutVals)
+  /// CALL to callee (as described by CLI.Callee)
+  /// CALLSEQ_END
+  /// grab callee resulting values..
+  SDValue LowerCall(CallLoweringInfo &CLI,
+                    SmallVectorImpl<SDValue> &InVals) const override;
+
   /// Perform the last clean-ups after finishing instruction selection.
   void finalizeLowering(MachineFunction &MF) const override;
 

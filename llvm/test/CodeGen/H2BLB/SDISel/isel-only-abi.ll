@@ -128,3 +128,72 @@ define i16 @fourArgsi16(i16 %arg, i16 %arg1, i16 %arg2, i16 %arg3) {
   ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
   ret i16 %arg3
 }
+
+; Check that we properly set r1 as the input argument for the call.
+define i16 @callAFctWithOneArg(i16 %arg) {
+  ; CHECK-LABEL: name: callAFctWithOneArg
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1, $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   ADJCALLSTACKDOWN 0, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   $r1 = COPY [[COPY1]]
+  ; CHECK-NEXT:   CALL @oneArgi16, csr, implicit-def dead $r0, implicit $sp, implicit $r1, implicit-def $sp, implicit-def $r1
+  ; CHECK-NEXT:   ADJCALLSTACKUP 0, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   $r1 = COPY [[COPY2]]
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  %res = call i16 @oneArgi16(i16 %arg)
+  ret i16 %res
+}
+
+declare i16 @arg16_32(i16, i32)
+
+; Check that we set r1 and d1 as the input argument for the call.
+define i16 @callAFctWithArg16_32(i16 %arg, i32 %arg1) {
+  ; CHECK-LABEL: name: callAFctWithArg16_32
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1, $d1, $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr32 = COPY $d1
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   ADJCALLSTACKDOWN 0, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   $r1 = COPY [[COPY2]]
+  ; CHECK-NEXT:   $d1 = COPY [[COPY1]]
+  ; CHECK-NEXT:   CALL @arg16_32, csr, implicit-def dead $r0, implicit $sp, implicit $r1, implicit $d1, implicit-def $sp, implicit-def $r1
+  ; CHECK-NEXT:   ADJCALLSTACKUP 0, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   [[COPY3:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   $r1 = COPY [[COPY3]]
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  %res = call i16 @arg16_32(i16 %arg, i32 %arg1)
+  ret i16 %res
+}
+
+declare i16 @arg16_16(i16, i16)
+
+; Check that we swap the input arg r1, r2 to r2, r1 to match the
+; desired argument sequence.
+define i16 @callAFctWithTwoI16Arg(i16 %arg, i16 %arg1) {
+  ; CHECK-LABEL: name: callAFctWithTwoI16Arg
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1, $r2, $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r2
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   ADJCALLSTACKDOWN 0, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   $r1 = COPY [[COPY1]]
+  ; CHECK-NEXT:   $r2 = COPY [[COPY2]]
+  ; CHECK-NEXT:   CALL @arg16_16, csr, implicit-def dead $r0, implicit $sp, implicit $r1, implicit $r2, implicit-def $sp, implicit-def $r1
+  ; CHECK-NEXT:   ADJCALLSTACKUP 0, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   [[COPY3:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   $r1 = COPY [[COPY3]]
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  %res = call i16 @arg16_16(i16 %arg1, i16 %arg)
+  ret i16 %res
+}

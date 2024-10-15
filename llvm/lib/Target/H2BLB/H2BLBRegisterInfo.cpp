@@ -28,8 +28,15 @@ H2BLBRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
   return CSR_SaveList;
 }
 
+const uint32_t *
+H2BLBRegisterInfo::getCallPreservedMask(const MachineFunction &MF,
+                                        CallingConv::ID CC) const {
+  return CSR_RegMask;
+}
+
 BitVector H2BLBRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   BitVector Reserved(getNumRegs());
+  markSuperRegs(Reserved, H2BLB::SP);
   return Reserved;
 }
 bool H2BLBRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,

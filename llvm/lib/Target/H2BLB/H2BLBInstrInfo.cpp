@@ -25,4 +25,5 @@
 
 using namespace llvm;
 
-H2BLBInstrInfo::H2BLBInstrInfo() : H2BLBGenInstrInfo() {}
+H2BLBInstrInfo::H2BLBInstrInfo()
+    : H2BLBGenInstrInfo(H2BLB::ADJCALLSTACKDOWN, H2BLB::ADJCALLSTACKUP) {}

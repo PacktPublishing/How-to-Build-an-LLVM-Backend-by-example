@@ -26,7 +26,8 @@
 
 using namespace llvm;
 
-H2BLBInstrInfo::H2BLBInstrInfo() : H2BLBGenInstrInfo() {}
+H2BLBInstrInfo::H2BLBInstrInfo()
+    : H2BLBGenInstrInfo(H2BLB::ADJCALLSTACKDOWN, H2BLB::ADJCALLSTACKUP) {}
 
 void H2BLBInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
                                  MachineBasicBlock::iterator MI,

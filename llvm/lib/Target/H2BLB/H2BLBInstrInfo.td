@@ -84,6 +84,7 @@ def CALL : H2BLBInstruction<"call", "$tgt",
                                  /*iops=*/(ins i16imm:$tgt)> {
   bits<11> tgt;
   let Inst{10-0} = tgt;
+  let Pattern = [(H2BLBcall tglobaladdr:$tgt)];
 }
 
 let hasSideEffects = 1, isCodeGenOnly = 1 in {

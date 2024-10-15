@@ -159,6 +159,152 @@ SDValue H2BLBTargetLowering::LowerFormalArguments(
   return Chain;
 }
 
+SDValue H2BLBTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
+                                       SmallVectorImpl<SDValue> &InVals) const {
+  SelectionDAG &DAG = CLI.DAG;
+  SmallVector<ISD::OutputArg, 32> &Outs = CLI.Outs;
+  SmallVector<SDValue, 32> &OutVals = CLI.OutVals;
+  SmallVector<ISD::InputArg, 32> &Ins = CLI.Ins;
+
+  SDValue Chain = CLI.Chain;
+  SDValue Callee = CLI.Callee;
+  CallingConv::ID CallConv = CLI.CallConv;
+  MachineFunction &MF = DAG.getMachineFunction();
+
+  // H2BLB target does not support tail call optimization.
+  CLI.IsTailCall = false;
+
+  // Ditto for variadic arguments, though unlike tail calls, this is not
+  // an optimization, therefore if it is requested, we must bail out.
+  if (CLI.IsVarArg)
+    report_fatal_error("Var args not yet implemented");
+  bool IsVarArg = false;
+
+  switch (CallConv) {
+  default:
+    report_fatal_error("unsupported calling convention: " + Twine(CallConv));
+  case CallingConv::Fast:
+  case CallingConv::C:
+    break;
+  }
+
+  // Analyze operands of the call, assigning locations to each operand.
+  SmallVector<CCValAssign, 16> ArgLocs;
+  CCState CCInfo(CallConv, IsVarArg, MF, ArgLocs, *DAG.getContext());
+
+  CCInfo.AnalyzeCallOperands(Outs, CC_H2BLB_Common);
+
+  unsigned NumBytes = CCInfo.getStackSize();
+
+  // FIXME: Technically we would nedd to check that we support the
+  // flags requested in Outs.
+  for (const ISD::OutputArg &Out : Outs) {
+    ISD::ArgFlagsTy OutFlags = Out.Flags;
+    if (OutFlags.isByVal())
+      report_fatal_error("Unsupported attribute");
+  }
+
+  SDValue InGlue;
+
+  SmallVector<std::pair<Register, SDValue>> RegsToPass;
+
+  // Walk arg assignments
+  for (size_t i = 0, e = ArgLocs.size(); i != e; ++i) {
+    CCValAssign &VA = ArgLocs[i];
+    SDValue &Arg = OutVals[i];
+
+    if (VA.getLocInfo() != CCValAssign::Full)
+      report_fatal_error("extensions not yet implemented: " +
+                         Twine(VA.getLocInfo()));
+
+    // Push arguments into RegsToPass vector
+    if (VA.isRegLoc()) {
+      RegsToPass.emplace_back(VA.getLocReg(), Arg);
+      continue;
+    }
+    assert(VA.isMemLoc() && "Expected stack argument");
+    report_fatal_error("stack arguments not yet implemented");
+  }
+
+  // Now that we collected all the registers, start the call sequence.
+  auto PtrVT = getPointerTy(MF.getDataLayout());
+  Chain = DAG.getCALLSEQ_START(Chain, NumBytes, 0, CLI.DL);
+
+  // Build a sequence of copy-to-reg nodes chained together with token chain
+  // and flag operands which copy the outgoing args into the appropriate regs.
+  // We do this and not in the previous loop to chain the registers as close
+  // as possible to the actual call.
+  for (auto &RegToPass : RegsToPass) {
+    Chain = DAG.getCopyToReg(Chain, CLI.DL, RegToPass.first, RegToPass.second,
+                             InGlue);
+    InGlue = Chain.getValue(1);
+  }
+
+  // If the callee is a GlobalAddress node (quite common, every direct call is)
+  // turn it into a TargetGlobalAddress node so that all the generic code cannot
+  // mess with it.
+  if (GlobalAddressSDNode *G = dyn_cast<GlobalAddressSDNode>(Callee))
+    Callee = DAG.getTargetGlobalAddress(G->getGlobal(), CLI.DL, PtrVT,
+                                        G->getOffset(), 0);
+  else
+    report_fatal_error("non-direct calls not implemented");
+
+  SmallVector<SDValue, 8> Ops;
+  Ops.push_back(Chain);
+  Ops.push_back(Callee);
+
+  // Add argument registers to the end of the list so that they are
+  // known to be live into the call.
+  for (auto &Reg : RegsToPass)
+    Ops.push_back(DAG.getRegister(Reg.first, Reg.second.getValueType()));
+
+  const TargetRegisterInfo &TRI = *Subtarget.getRegisterInfo();
+  const uint32_t *Mask = TRI.getCallPreservedMask(MF, CallConv);
+
+  assert(Mask && "Missing call preserved mask for calling convention");
+  Ops.push_back(DAG.getRegisterMask(Mask));
+
+  if (InGlue.getNode())
+    Ops.push_back(InGlue);
+
+  // The call will return a chain & a flag for retval copies to use.
+  SDVTList NodeTys = DAG.getVTList(MVT::Other, MVT::Glue);
+  Chain = DAG.getNode(H2BLBISD::CALL, CLI.DL, NodeTys, Ops);
+  InGlue = Chain.getValue(1);
+
+  // Propagate any NoMerge attribute that we may have.
+  DAG.addNoMergeSiteInfo(Chain.getNode(), CLI.NoMerge);
+
+  // Finish the call sequence.
+  Chain = DAG.getCALLSEQ_END(Chain, NumBytes, 0, InGlue, CLI.DL);
+  InGlue = Chain.getValue(1);
+
+  // Assign locations to each value returned by this call.
+  SmallVector<CCValAssign, 16> RetValLocs;
+  CCState CCRetInfo(CallConv, IsVarArg, MF, RetValLocs, *DAG.getContext());
+
+  CCRetInfo.AnalyzeCallResult(Ins, RetCC_H2BLB_Common);
+
+  // Copy all of the result registers out of their specified physreg.
+  for (size_t i = 0, e = RetValLocs.size(); i != e; ++i) {
+    CCValAssign &VA = RetValLocs[i];
+    assert(VA.isRegLoc() && "stack return not yet implemented");
+    assert(VA.getLocInfo() == CCValAssign::Full &&
+           "extension/truncation of any sort, not yet implemented");
+
+    Chain =
+        DAG.getCopyFromReg(Chain, CLI.DL, VA.getLocReg(), VA.getValVT(), InGlue)
+            .getValue(1);
+
+    // Guarantee that all emitted copies are stuck together,
+    // avoiding something bad.
+    InGlue = Chain.getValue(2);
+    InVals.push_back(Chain.getValue(0));
+  }
+
+  return Chain;
+}
+
 void H2BLBTargetLowering::finalizeLowering(MachineFunction &MF) const {
   const TargetInstrInfo &TII = *Subtarget.getInstrInfo();
   MachineRegisterInfo &MRI = MF.getRegInfo();

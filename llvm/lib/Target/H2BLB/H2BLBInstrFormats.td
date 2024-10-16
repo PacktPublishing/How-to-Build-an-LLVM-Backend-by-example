@@ -1,3 +1,24 @@
+// classes for operand types.
+class AsmImmRange<int Low, int High> : AsmOperandClass {
+  let Name = "Imm" # Low # "_" # High;
+  let DiagnosticType = "InvalidImm" # Low # "_" # High;
+  let RenderMethod = "addImmOperands";
+  let PredicateMethod = "isImmInRange<" # Low # "," # High # ">";
+}
+
+def uimm7 : Operand<i16>, ImmLeaf<i16, [{return Imm >= 0 && Imm < 128;}]> {
+  let ParserMatchClass = AsmImmRange<0, 127>;
+}
+
+def uimm4 : Operand<i16>, ImmLeaf<i16, [{return Imm >= 0 && Imm < 16;}]> {
+  let ParserMatchClass = AsmImmRange<0, 15>;
+}
+
+def addrmode : ComplexPattern<iPTR, 2, "selectAddrMode", []>;
+
+
+// Instruction templates.
+
 class H2BLBInstruction<string asm, string operands,
                        bits<5> opcode = 0,
                        bit is32Bit = 0,
@@ -54,20 +75,50 @@ class H2BLBNoOperandInstruction<string asm,
   let Inst{9-1} = 0;
 }
 
-// classes for operand types.
-class AsmImmRange<int Low, int High> : AsmOperandClass {
-  let Name = "Imm" # Low # "_" # High;
-  let DiagnosticType = "InvalidImm" # Low # "_" # High;
-  let RenderMethod = "addImmOperands";
-  let PredicateMethod = "isImmInRange<" # Low # "," # High # ">";
+class H2BLBStoreInstruction<string asm,
+                             bit is32Bit = 0,
+                             RegisterClass SrcRC = !if(is32Bit, GPR32, GPR16)>
+          : H2BLBInstruction<asm, "$src, $addr, $offset", /*opcode=*/0b00101, is32Bit,
+                             (outs), (ins SrcRC:$src, GPR16:$addr, uimm4:$offset)> {
+  let mayStore = 1;
+  bits<3> src;
+  bits<3> addr;
+  bits<4> offset;
+  let Inst{9-7} = src;
+  let Inst{6-4} = addr;
+  let Inst{3-0} = offset;
 }
 
-def uimm7 : Operand<i16>, ImmLeaf<i16, [{return Imm >= 0 && Imm < 128;}]> {
-  let ParserMatchClass = AsmImmRange<0, 127>;
+class H2BLBLoadInstruction<string asm,
+                           bit is32Bit = 0,
+                           RegisterClass DstRC = !if(is32Bit, GPR32, GPR16)>
+          : H2BLBInstruction<asm, "$dst, $addr, $offset",
+                                 /*opcode=*/0b00011,
+                                 is32Bit,
+                                 /*oops=*/(outs DstRC:$dst),
+                                 /*iops=*/(ins GPR16:$addr, uimm4:$offset)> {
+  let mayLoad = 1;
+  bits<3> dst;
+  bits<3> addr;
+  bits<4> offset;
+  let Inst{9-7} = dst;
+  let Inst{6-4} = addr;
+  let Inst{3-0} = offset;
 }
 
-def uimm4 : Operand<i16>, ImmLeaf<i16, [{return Imm >= 0 && Imm < 16;}]> {
-  let ParserMatchClass = AsmImmRange<0, 15>;
+class H2BLBMoveInstruction<string asm,
+                           bit is32Bit = 0,
+                           RegisterClass RC = !if(is32Bit, GPR32, GPR16)>
+          : H2BLBInstruction<asm, "$dst, $src",
+                                 /*opcode=*/0b00110,
+                                 is32Bit,
+                                 /*oops=*/(outs RC:$dst),
+                                 /*iops=*/(ins RC:$src)> {
+  let isMoveReg = 1;
+  let isAsCheapAsAMove = 1;
+  bits<3> dst;
+  bits<3> src;
+  let Inst{9-7} = dst;
+  let Inst{6-4} = src;
+  let Inst{3-0} = 0;
 }
-
-def addrmode : ComplexPattern<iPTR, 2, "selectAddrMode", []>;

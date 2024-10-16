@@ -14,6 +14,7 @@
 #include "H2BLBFrameLowering.h"
 #include "MCTargetDesc/H2BLBMCTargetDesc.h" // For the enum of the regclasses.
 #include "llvm/ADT/BitVector.h"
+#include "llvm/CodeGen/MachineFrameInfo.h"
 #include "llvm/CodeGen/MachineFunction.h"
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
 
@@ -36,12 +37,32 @@ H2BLBRegisterInfo::getCallPreservedMask(const MachineFunction &MF,
 
 BitVector H2BLBRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   BitVector Reserved(getNumRegs());
+  // Reserve the link and stack registers so that the register allocator doesn't
+  // touch them.
+  Reserved.set(H2BLB::R0);
   markSuperRegs(Reserved, H2BLB::SP);
   return Reserved;
 }
 bool H2BLBRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
                                             int SPAdj, unsigned FIOperandNum,
                                             RegScavenger *RS) const {
+
+  assert(SPAdj == 0 && "unhandled SP adjustment in call sequence?");
+
+  MachineInstr &MI = *II;
+  MachineBasicBlock &MBB = *MI.getParent();
+  MachineFunction &MF = *MBB.getParent();
+  const MachineFrameInfo &MFI = MF.getFrameInfo();
+  const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
+
+  DebugLoc DL = MI.getDebugLoc();
+
+  MachineOperand &FIOp = MI.getOperand(FIOperandNum);
+  int Index = MI.getOperand(FIOperandNum).getIndex();
+
+  int64_t Offset = MFI.getObjectOffset(Index);
+  // TODO: replace stackslot with SP + offset
+
   return false;
 }
 

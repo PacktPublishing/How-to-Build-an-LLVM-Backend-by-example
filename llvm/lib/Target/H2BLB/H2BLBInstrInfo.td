@@ -55,19 +55,13 @@ def LD16imm16 : H2BLBPseudoInstruction<(outs GPR16:$dst), (ins i16imm:$src),
                                        [(set GPR16:$dst, imm:$src)]>;
 
 // Load a register.
-let mayLoad = 1 in
-def LDR16 : H2BLBInstruction<"ldr16", "$dst, $addr, $offset",
-                                 /*opcode=*/0b00011,
-                                 /*is32Bit=*/0,
-                                 /*oops=*/(outs GPR16:$dst),
-                                 /*iops=*/(ins GPR16:$addr, uimm4:$offset)> {
-  bits<3> dst;
-  bits<3> addr;
-  bits<4> offset;
-  let Inst{9-7} = dst;
-  let Inst{6-4} = addr;
-  let Inst{3-0} = offset;
+def LDR16 : H2BLBLoadInstruction<"ldr16",
+                                 /*is32Bit=*/0> {
   let Pattern = [(set GPR16:$dst, (load (addrmode GPR16:$addr, uimm4:$offset)))];
+}
+def LDR32 : H2BLBLoadInstruction<"ldr32",
+                                 /*is32Bit=*/1> {
+  let Pattern = [(set GPR32:$dst, (load (addrmode GPR16:$addr, uimm4:$offset)))];
 }
 
 let isCall = 1, Defs = [R0], Uses = [SP] in
@@ -88,4 +82,43 @@ def ADJCALLSTACKDOWN : H2BLBPseudoInstruction<(outs), (ins i32imm:$amt1, i32imm:
 def ADJCALLSTACKUP : H2BLBPseudoInstruction<(outs), (ins i32imm:$amt1, i32imm:$amt2),
                             [(H2BLBcallseq_end timm:$amt1, timm:$amt2)]>;
 }
+}
+
+// Store a register.
+def STR16 : H2BLBStoreInstruction<"str16",
+                                 /*is32Bit=*/0> {
+  let Pattern = [(store (i16 GPR16:$src), (addrmode GPR16:$addr, uimm4:$offset))];
+}
+
+def STR32 : H2BLBStoreInstruction<"str32",
+                                 /*is32Bit=*/1> {
+  let Pattern = [(store (i32 GPR32:$src), (addrmode GPR16:$addr, uimm4:$offset))];
+}
+
+def MOV16 : H2BLBMoveInstruction<"mov16", /*is32Bit=*/0>;
+def MOV32 : H2BLBMoveInstruction<"mov32", /*is32Bit=*/1>;
+
+
+def MOVTOSP: H2BLBInstruction<"movtosp", "$sp, $src",
+                                 /*opcode=*/0b00111,
+                                 /*toSP=*/1,
+                                 /*oops=*/(outs OnlySP:$sp),
+                                 /*iops=*/(ins GPR16:$src)> {
+  bits<3> sp;
+  bits<3> src;
+  let Inst{9-7} = sp;
+  let Inst{6-4} = src;
+  let Inst{3-0} = 0;
+}
+
+def MOVFROMSP: H2BLBInstruction<"movfromsp", "$dst, $sp",
+                                 /*opcode=*/0b00111,
+                                 /*toSP=*/0,
+                                 /*oops=*/(outs GPR16:$dst),
+                                 /*iops=*/(ins OnlySP:$sp)> {
+  bits<3> dst;
+  bits<3> sp;
+  let Inst{9-7} = dst;
+  let Inst{6-4} = sp;
+  let Inst{3-0} = 0;
 }

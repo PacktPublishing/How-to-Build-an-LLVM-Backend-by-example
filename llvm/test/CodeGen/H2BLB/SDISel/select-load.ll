@@ -9,3 +9,12 @@ define i16 @loadi16(ptr %arg) {
   %res = load i16, ptr %arg
   ret i16 %res
 }
+
+define i32 @loadi32(ptr %arg) {
+; CHECK-LABEL: loadi32:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ldr32 d1, r1, 0
+; CHECK-NEXT:    ret
+  %res = load i32, ptr %arg
+  ret i32 %res
+}

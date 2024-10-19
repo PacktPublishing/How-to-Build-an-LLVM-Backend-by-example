@@ -101,6 +101,23 @@ class H2BLBStoreInstruction<string asm,
   let Inst{3-0} = offset;
 }
 
+class H2BLBLoadInstruction<string asm,
+                           bit is32Bit = 0,
+                           RegisterClass DstRC = !if(is32Bit, GPR32, GPR16)>
+          : H2BLBInstruction<asm, "$dst, $addr, $offset",
+                                 /*opcode=*/0b00011,
+                                 is32Bit,
+                                 /*oops=*/(outs DstRC:$dst),
+                                 /*iops=*/(ins GPR16:$addr, uimm4:$offset)> {
+  let mayLoad = 1;
+  bits<3> dst;
+  bits<3> addr;
+  bits<4> offset;
+  let Inst{9-7} = dst;
+  let Inst{6-4} = addr;
+  let Inst{3-0} = offset;
+}
+
 class H2BLBMoveInstruction<string asm,
                            bit is32Bit = 0,
                            RegisterClass RC = !if(is32Bit, GPR32, GPR16)>

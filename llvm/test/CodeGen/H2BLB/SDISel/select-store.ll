@@ -20,6 +20,31 @@ define void @storei16PlusImm(i16 %val, ptr %arg) {
   ret void
 }
 
+define void @storei16PlusRegOffset(i16 %val, ptr %arg, i16 %offset) {
+; CHECK-LABEL: storei16PlusRegOffset:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    addi16 r2, r2, r3
+; CHECK-NEXT:    str16 r1, r2, 0
+; CHECK-NEXT:    ret
+  %addr = getelementptr i8, ptr %arg, i16 %offset
+  store i16 %val, ptr %addr
+  ret void
+}
+
+; Check that we don't fold immediate that are too big to fit
+; in the encoding space.
+define void @storei32PlusTooBigImm(i16 %val, ptr %arg) {
+; CHECK-LABEL: storei32PlusTooBigImm:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ldi16 r3, 19
+; CHECK-NEXT:    addi16 r2, r2, r3
+; CHECK-NEXT:    str16 r1, r2, 0
+; CHECK-NEXT:    ret
+  %addr = getelementptr i8, ptr %arg, i16 19
+  store i16 %val, ptr %addr
+  ret void
+}
+
 define void @storei32(i32 %val, ptr %arg) {
 ; CHECK-LABEL: storei32:
 ; CHECK:       # %bb.0:

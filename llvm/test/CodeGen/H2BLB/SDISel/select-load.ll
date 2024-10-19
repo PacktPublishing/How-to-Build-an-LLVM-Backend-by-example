@@ -20,6 +20,17 @@ define i16 @loadi16PlusImm(ptr %arg) {
   ret i16 %res
 }
 
+define i16 @loadi16PlusOffset(ptr %arg, i16 %offset) {
+; CHECK-LABEL: loadi16PlusOffset:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    addi16 r1, r1, r2
+; CHECK-NEXT:    ldr16 r1, r1, 0
+; CHECK-NEXT:    ret
+  %addr = getelementptr i8, ptr %arg, i16 %offset
+  %res = load i16, ptr %addr
+  ret i16 %res
+}
+
 define i32 @loadi32(ptr %arg) {
 ; CHECK-LABEL: loadi32:
 ; CHECK:       # %bb.0:
@@ -38,3 +49,18 @@ define i32 @loadi32PlusImm(ptr %arg) {
   %res = load i32, ptr %addr
   ret i32 %res
 }
+
+; Check that we don't fold immediate that are too big to fit
+; in the encoding space.
+define i32 @loadi32PlusTooBigImm(ptr %arg) {
+; CHECK-LABEL: loadi32PlusTooBigImm:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ldi16 r2, 27
+; CHECK-NEXT:    addi16 r1, r1, r2
+; CHECK-NEXT:    ldr32 d1, r1, 0
+; CHECK-NEXT:    ret
+  %addr = getelementptr i8, ptr %arg, i16 27
+  %res = load i32, ptr %addr
+  ret i32 %res
+}
+

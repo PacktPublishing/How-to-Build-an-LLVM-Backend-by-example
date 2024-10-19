@@ -55,6 +55,9 @@ public:
                       const SmallVectorImpl<SDValue> &OutVals, const SDLoc &DL,
                       SelectionDAG &DAG) const override;
 
+  /// Perform the last clean-ups after finishing instruction selection.
+  void finalizeLowering(MachineFunction &MF) const override;
+
   // This method returns the name of a target specific DAG node.
   const char *getTargetNodeName(unsigned Opcode) const override;
 };

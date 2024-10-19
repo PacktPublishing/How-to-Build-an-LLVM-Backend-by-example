@@ -159,6 +159,33 @@ SDValue H2BLBTargetLowering::LowerFormalArguments(
   return Chain;
 }
 
+void H2BLBTargetLowering::finalizeLowering(MachineFunction &MF) const {
+  const TargetInstrInfo &TII = *Subtarget.getInstrInfo();
+  MachineRegisterInfo &MRI = MF.getRegInfo();
+  Register SavedLR = MRI.createVirtualRegister(&H2BLB::GPR16RegClass);
+  Register LR = H2BLB::R0;
+
+  MachineBasicBlock &EntryMBB = MF.front();
+  BuildMI(EntryMBB, EntryMBB.begin(), DebugLoc(), TII.get(TargetOpcode::COPY),
+          SavedLR)
+      .addReg(LR);
+  EntryMBB.addLiveIn(LR);
+
+  for (MachineBasicBlock &MaybeExitMBB : MF) {
+    if (!MaybeExitMBB.succ_empty())
+      continue;
+    assert(MaybeExitMBB.getFirstTerminator() != MaybeExitMBB.end() &&
+           "Exit block must have a terminator");
+    assert(MaybeExitMBB.getFirstTerminator()->getOpcode() == H2BLB::RETURN &&
+           "Exit block must end with return");
+    BuildMI(MaybeExitMBB, MaybeExitMBB.getFirstTerminator(), DebugLoc(),
+            TII.get(TargetOpcode::COPY), LR)
+        .addReg(SavedLR);
+  }
+
+  TargetLowering::finalizeLowering(MF);
+}
+
 const char *H2BLBTargetLowering::getTargetNodeName(unsigned Opcode) const {
   switch ((H2BLBISD::NodeType)Opcode) {
   case H2BLBISD::FIRST_NUMBER:

@@ -13,8 +13,12 @@ body:             |
     ; CHECK-NEXT: {{  $}}
     ; CHECK-NEXT: $r1 = MOV16 $r0
     ; CHECK-NEXT: $d2 = MOV32 $d1
+    ; CHECK-NEXT: $sp = MOVTOSP $r1
+    ; CHECK-NEXT: $r1 = MOVFROMSP $sp
     ; CHECK-NEXT: RETURN implicit $r0, implicit $r1, implicit $d2
     $r1 = COPY $r0
     $d2 = COPY $d1
+    $sp = COPY $r1
+    $r1 = COPY $sp
     RETURN implicit $r0, implicit $r1, implicit $d2
 ...

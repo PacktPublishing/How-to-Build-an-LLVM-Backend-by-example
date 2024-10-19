@@ -101,6 +101,17 @@ def ADJCALLSTACKUP : H2BLBPseudoInstruction<(outs), (ins i32imm:$amt1, i32imm:$a
 }
 }
 
+// Store a register.
+def STR16 : H2BLBStoreInstruction<"str16",
+                                 /*is32Bit=*/0> {
+  let Pattern = [(store (i16 GPR16:$src), (addrmode GPR16:$addr, uimm4:$offset))];
+}
+
+def STR32 : H2BLBStoreInstruction<"str32",
+                                 /*is32Bit=*/1> {
+  let Pattern = [(store (i32 GPR32:$src), (addrmode GPR16:$addr, uimm4:$offset))];
+}
+
 def MOV16 : H2BLBMoveInstruction<"mov16", /*is32Bit=*/0>;
 def MOV32 : H2BLBMoveInstruction<"mov32", /*is32Bit=*/1>;
 

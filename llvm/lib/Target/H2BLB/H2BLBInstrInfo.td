@@ -1,3 +1,15 @@
+//===- H2BLBInstrFormats.td - H2BLB Instruction Information --*- tblgen -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+//
+//  Describe H2BLB instructions
+//
+//===----------------------------------------------------------------------===//
+
 include "H2BLBInstrFormats.td"
 
 // SelectionDAG target specific nodes.

@@ -87,6 +87,20 @@ class H2BLBNoOperandInstruction<string asm,
   let Inst{9-1} = 0;
 }
 
+class H2BLBStoreInstruction<string asm,
+                             bit is32Bit = 0,
+                             RegisterClass SrcRC = !if(is32Bit, GPR32, GPR16)>
+          : H2BLBInstruction<asm, "$src, $addr, $offset", /*opcode=*/0b00101, is32Bit,
+                             (outs), (ins SrcRC:$src, GPR16:$addr, uimm4:$offset)> {
+  let mayStore = 1;
+  bits<3> src;
+  bits<3> addr;
+  bits<4> offset;
+  let Inst{9-7} = src;
+  let Inst{6-4} = addr;
+  let Inst{3-0} = offset;
+}
+
 class H2BLBMoveInstruction<string asm,
                            bit is32Bit = 0,
                            RegisterClass RC = !if(is32Bit, GPR32, GPR16)>

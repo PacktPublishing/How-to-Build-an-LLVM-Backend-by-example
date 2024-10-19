@@ -10,11 +10,31 @@ define void @storei16(i16 %val, ptr %arg) {
   ret void
 }
 
+define void @storei16PlusImm(i16 %val, ptr %arg) {
+; CHECK-LABEL: storei16PlusImm:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    str16 r1, r2, 1
+; CHECK-NEXT:    ret
+  %addr = getelementptr i8, ptr %arg, i16 1
+  store i16 %val, ptr %addr
+  ret void
+}
+
 define void @storei32(i32 %val, ptr %arg) {
 ; CHECK-LABEL: storei32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    str32 d1, r1, 0
 ; CHECK-NEXT:    ret
   store i32 %val, ptr %arg
+  ret void
+}
+
+define void @storei32PlusImm(i32 %val, ptr %arg) {
+; CHECK-LABEL: storei32PlusImm:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    str32 d1, r1, 7
+; CHECK-NEXT:    ret
+  %addr = getelementptr i8, ptr %arg, i16 7
+  store i32 %val, ptr %addr
   ret void
 }

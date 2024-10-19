@@ -71,11 +71,19 @@ bool H2BLBDAGToDAGISel::selectAddrMode(SDValue N, SDValue &Base,
     return true;
   }
 
-  // TODO: Do some matching of ADD + immediate and fold if it fits.
+  // Do some matching of ADD + immediate and fold if it fits.
+  Base = N;
+  uint64_t Offset = 0;
+  if (N->getOpcode() == ISD::ADD && isa<ConstantSDNode>(N->getOperand(1))) {
+    uint64_t CstImm = N->getConstantOperandVal(1);
+    if (CstImm < 16) {
+      Base = N->getOperand(0);
+      Offset = CstImm;
+    }
+  }
 
   // Base only.
-  Base = N;
-  OffImm = CurDAG->getTargetConstant(0, dl, MVT::i16);
+  OffImm = CurDAG->getTargetConstant(Offset, dl, MVT::i16);
   return true;
 }
 

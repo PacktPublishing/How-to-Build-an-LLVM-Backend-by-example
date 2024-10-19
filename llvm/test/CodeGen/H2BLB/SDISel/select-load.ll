@@ -10,11 +10,31 @@ define i16 @loadi16(ptr %arg) {
   ret i16 %res
 }
 
+define i16 @loadi16PlusImm(ptr %arg) {
+; CHECK-LABEL: loadi16PlusImm:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ldr16 r1, r1, 4
+; CHECK-NEXT:    ret
+  %addr = getelementptr i8, ptr %arg, i16 4
+  %res = load i16, ptr %addr
+  ret i16 %res
+}
+
 define i32 @loadi32(ptr %arg) {
 ; CHECK-LABEL: loadi32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    ldr32 d1, r1, 0
 ; CHECK-NEXT:    ret
   %res = load i32, ptr %arg
+  ret i32 %res
+}
+
+define i32 @loadi32PlusImm(ptr %arg) {
+; CHECK-LABEL: loadi32PlusImm:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ldr32 d1, r1, 12
+; CHECK-NEXT:    ret
+  %addr = getelementptr i8, ptr %arg, i16 12
+  %res = load i32, ptr %addr
   ret i32 %res
 }

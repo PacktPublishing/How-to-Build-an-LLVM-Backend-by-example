@@ -100,3 +100,6 @@ def ADJCALLSTACKUP : H2BLBPseudoInstruction<(outs), (ins i32imm:$amt1, i32imm:$a
                             [(H2BLBcallseq_end timm:$amt1, timm:$amt2)]>;
 }
 }
+
+def MOV16 : H2BLBMoveInstruction<"mov16", /*is32Bit=*/0>;
+def MOV32 : H2BLBMoveInstruction<"mov32", /*is32Bit=*/1>;

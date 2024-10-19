@@ -12,6 +12,7 @@
 
 #include "H2BLBInstrInfo.h"
 #include "H2BLB.h"
+#include "H2BLBRegisterInfo.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/CodeGen/MachineBasicBlock.h"
 #include "llvm/CodeGen/MachineInstrBuilder.h"
@@ -26,3 +27,16 @@
 using namespace llvm;
 
 H2BLBInstrInfo::H2BLBInstrInfo() : H2BLBGenInstrInfo() {}
+
+void H2BLBInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
+                                 MachineBasicBlock::iterator MI,
+                                 const DebugLoc &DL, MCRegister DestReg,
+                                 MCRegister SrcReg, bool KillSrc) const {
+  const TargetRegisterInfo &TRI =
+      *MBB.getParent()->getSubtarget().getRegisterInfo();
+  unsigned Opc = TRI.getMinimalPhysRegClass(DestReg) == &H2BLB::GPR16RegClass
+                     ? H2BLB::MOV16
+                     : H2BLB::MOV32;
+  BuildMI(MBB, MI, MI->getDebugLoc(), get(Opc), DestReg)
+      .addReg(SrcReg, getKillRegState(KillSrc));
+}

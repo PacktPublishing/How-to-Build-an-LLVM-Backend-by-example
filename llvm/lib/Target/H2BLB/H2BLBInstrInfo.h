@@ -24,6 +24,14 @@ namespace llvm {
 class H2BLBInstrInfo : public H2BLBGenInstrInfo {
 public:
   H2BLBInstrInfo();
+
+  /// Callback to materialize a register-to-regiter copy before \p MI in
+  /// \p MBB. The copy to materialize is DestReg = COPY SrcReg. The opcode
+  /// of the COPY needs to be the actual target-specific opcode.
+  void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator MI,
+                   const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
+                   bool KillSrc, bool RenamableDest,
+                   bool RenamableSrc) const override;
 };
 } // namespace llvm
 

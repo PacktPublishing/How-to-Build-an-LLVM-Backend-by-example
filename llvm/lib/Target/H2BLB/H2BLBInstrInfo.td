@@ -39,7 +39,7 @@ def H2BLBcall : SDNode<"H2BLBISD::CALL",
                         SDNPVariadic]>;
 
 
-
+let Pattern = [(set GPR16:$dst, (add GPR16:$src0, GPR16:$src1))] in
 def ADDi16rr : H2BLBBinaryInstruction<"addi16",
                                       /*opcode=*/0,
                                       /*is32Bit=*/false>;

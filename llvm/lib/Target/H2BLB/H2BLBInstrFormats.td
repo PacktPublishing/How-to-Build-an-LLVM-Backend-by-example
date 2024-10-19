@@ -86,3 +86,20 @@ class H2BLBNoOperandInstruction<string asm,
                              (outs), (ins)> {
   let Inst{9-1} = 0;
 }
+
+class H2BLBMoveInstruction<string asm,
+                           bit is32Bit = 0,
+                           RegisterClass RC = !if(is32Bit, GPR32, GPR16)>
+          : H2BLBInstruction<asm, "$dst, $src",
+                                 /*opcode=*/0b00110,
+                                 is32Bit,
+                                 /*oops=*/(outs RC:$dst),
+                                 /*iops=*/(ins RC:$src)> {
+  let isMoveReg = 1;
+  let isAsCheapAsAMove = 1;
+  bits<3> dst;
+  bits<3> src;
+  let Inst{9-7} = dst;
+  let Inst{6-4} = src;
+  let Inst{3-0} = 0;
+}

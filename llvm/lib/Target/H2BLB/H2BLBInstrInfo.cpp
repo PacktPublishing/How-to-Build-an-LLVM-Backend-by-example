@@ -37,6 +37,15 @@ void H2BLBInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
   unsigned Opc = TRI.getMinimalPhysRegClass(DestReg) == &H2BLB::GPR16RegClass
                      ? H2BLB::MOV16
                      : H2BLB::MOV32;
+  if (SrcReg == H2BLB::SP) {
+    assert(TRI.getMinimalPhysRegClass(DestReg) == &H2BLB::GPR16RegClass &&
+           "Dest reg for stack must be 16-bit");
+    Opc = H2BLB::MOVFROMSP;
+  } else if (DestReg == H2BLB::SP) {
+    assert(TRI.getMinimalPhysRegClass(SrcReg) == &H2BLB::GPR16RegClass &&
+           "Src reg for stack must be 16-bit");
+    Opc = H2BLB::MOVTOSP;
+  }
   BuildMI(MBB, MI, MI->getDebugLoc(), get(Opc), DestReg)
       .addReg(SrcReg, getKillRegState(KillSrc));
 }

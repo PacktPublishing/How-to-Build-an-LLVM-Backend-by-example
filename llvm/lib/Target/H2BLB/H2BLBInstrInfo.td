@@ -138,3 +138,8 @@ def STRSP16: H2BLBStoreSPInstruction<"strsp16", /*is32Bit=*/0> {
 }
 def STRSP32: H2BLBStoreSPInstruction<"strsp32", /*is32Bit=*/1> {
 }
+
+def LDRSP16: H2BLBLoadSPInstruction<"ldrsp16", /*is32Bit=*/0> {
+}
+def LDRSP32: H2BLBLoadSPInstruction<"ldrsp32", /*is32Bit=*/1> {
+}

@@ -197,3 +197,98 @@ define i16 @callAFctWithTwoI16Arg(i16 %arg, i16 %arg1) {
   %res = call i16 @arg16_16(i16 %arg1, i16 %arg)
   ret i16 %res
 }
+
+declare i16 @lotsOfArgs2(i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16)
+
+; Check that we duplicate %arg on as many stack slots as
+; required to call lotsOfArgs1.
+define i16 @foo1(i16 %arg) {
+  ; CHECK-LABEL: name: foo1
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1, $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   ADJCALLSTACKDOWN 16, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   STRSP16 [[COPY1]], $sp, 14 :: (store (s16) into stack + 14)
+  ; CHECK-NEXT:   STRSP16 [[COPY1]], $sp, 12 :: (store (s16) into stack + 12)
+  ; CHECK-NEXT:   STRSP16 [[COPY1]], $sp, 10 :: (store (s16) into stack + 10)
+  ; CHECK-NEXT:   STRSP16 [[COPY1]], $sp, 8 :: (store (s16) into stack + 8)
+  ; CHECK-NEXT:   STRSP16 [[COPY1]], $sp, 6 :: (store (s16) into stack + 6)
+  ; CHECK-NEXT:   STRSP16 [[COPY1]], $sp, 4 :: (store (s16) into stack + 4)
+  ; CHECK-NEXT:   STRSP16 [[COPY1]], $sp, 2 :: (store (s16) into stack + 2)
+  ; CHECK-NEXT:   STRSP16 [[COPY1]], $sp, 0 :: (store (s16) into stack)
+  ; CHECK-NEXT:   $r1 = COPY [[COPY1]]
+  ; CHECK-NEXT:   $r2 = COPY [[COPY1]]
+  ; CHECK-NEXT:   $r3 = COPY [[COPY1]]
+  ; CHECK-NEXT:   CALL @lotsOfArgs1, csr, implicit-def dead $r0, implicit $sp, implicit $r1, implicit $r2, implicit $r3, implicit-def $sp, implicit-def $r1
+  ; CHECK-NEXT:   ADJCALLSTACKUP 16, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   $r1 = COPY [[COPY2]]
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+   %res = call i16 @lotsOfArgs1(i16 %arg, i16 %arg, i16 %arg, i16 %arg, i16 %arg, i16 %arg, i16 %arg, i16 %arg, i16 %arg, i16 %arg, i16 %arg)
+   ret i16 %res
+}
+
+; Stress test for the stack lowering.
+define i16 @lotsOfArgs1(i16 %a1, i16 %a2, i16 %a3, i16 %a4, i16 %a5, i16 %a6, i16 %a7, i16 %a8, i16 %a9, i16 %a10, i16 %a11) {
+  ; CHECK-LABEL: name: lotsOfArgs1
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1, $r2, $r3, $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r3
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr16 = COPY $r2
+  ; CHECK-NEXT:   [[COPY3:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   ADJCALLSTACKDOWN 16, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   [[LDRSP16_:%[0-9]+]]:gpr16 = LDRSP16 %fixed-stack.0, 0 :: (load (s16) from %fixed-stack.0)
+  ; CHECK-NEXT:   STRSP16 [[LDRSP16_]], $sp, 14 :: (store (s16) into stack + 14)
+  ; CHECK-NEXT:   [[LDRSP16_1:%[0-9]+]]:gpr16 = LDRSP16 %fixed-stack.1, 0 :: (load (s16) from %fixed-stack.1, align 4)
+  ; CHECK-NEXT:   STRSP16 [[LDRSP16_1]], $sp, 12 :: (store (s16) into stack + 12)
+  ; CHECK-NEXT:   [[LDRSP16_2:%[0-9]+]]:gpr16 = LDRSP16 %fixed-stack.2, 0 :: (load (s16) from %fixed-stack.2)
+  ; CHECK-NEXT:   STRSP16 [[LDRSP16_2]], $sp, 10 :: (store (s16) into stack + 10)
+  ; CHECK-NEXT:   [[LDRSP16_3:%[0-9]+]]:gpr16 = LDRSP16 %fixed-stack.3, 0 :: (load (s16) from %fixed-stack.3, align 8)
+  ; CHECK-NEXT:   STRSP16 [[LDRSP16_3]], $sp, 8 :: (store (s16) into stack + 8)
+  ; CHECK-NEXT:   [[LDRSP16_4:%[0-9]+]]:gpr16 = LDRSP16 %fixed-stack.4, 0 :: (load (s16) from %fixed-stack.4)
+  ; CHECK-NEXT:   STRSP16 [[LDRSP16_4]], $sp, 6 :: (store (s16) into stack + 6)
+  ; CHECK-NEXT:   [[LDRSP16_5:%[0-9]+]]:gpr16 = LDRSP16 %fixed-stack.5, 0 :: (load (s16) from %fixed-stack.5, align 4)
+  ; CHECK-NEXT:   STRSP16 [[LDRSP16_5]], $sp, 4 :: (store (s16) into stack + 4)
+  ; CHECK-NEXT:   [[LDRSP16_6:%[0-9]+]]:gpr16 = LDRSP16 %fixed-stack.6, 0 :: (load (s16) from %fixed-stack.6)
+  ; CHECK-NEXT:   STRSP16 [[LDRSP16_6]], $sp, 2 :: (store (s16) into stack + 2)
+  ; CHECK-NEXT:   [[LDRSP16_7:%[0-9]+]]:gpr16 = LDRSP16 %fixed-stack.7, 0 :: (load (s16) from %fixed-stack.7, align 8)
+  ; CHECK-NEXT:   STRSP16 [[LDRSP16_7]], $sp, 0 :: (store (s16) into stack)
+  ; CHECK-NEXT:   $r1 = COPY [[COPY3]]
+  ; CHECK-NEXT:   $r2 = COPY [[COPY2]]
+  ; CHECK-NEXT:   $r3 = COPY [[COPY1]]
+  ; CHECK-NEXT:   CALL @lotsOfArgs2, csr, implicit-def dead $r0, implicit $sp, implicit $r1, implicit $r2, implicit $r3, implicit-def $sp, implicit-def $r1
+  ; CHECK-NEXT:   ADJCALLSTACKUP 16, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   [[COPY4:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   ADJCALLSTACKDOWN 16, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   STRSP16 [[COPY2]], $sp, 12 :: (store (s16) into stack + 12)
+  ; CHECK-NEXT:   STRSP16 [[COPY1]], $sp, 10 :: (store (s16) into stack + 10)
+  ; CHECK-NEXT:   STRSP16 [[LDRSP16_7]], $sp, 8 :: (store (s16) into stack + 8)
+  ; CHECK-NEXT:   STRSP16 [[LDRSP16_6]], $sp, 6 :: (store (s16) into stack + 6)
+  ; CHECK-NEXT:   STRSP16 [[LDRSP16_5]], $sp, 4 :: (store (s16) into stack + 4)
+  ; CHECK-NEXT:   STRSP16 [[LDRSP16_4]], $sp, 2 :: (store (s16) into stack + 2)
+  ; CHECK-NEXT:   STRSP16 [[LDRSP16_3]], $sp, 0 :: (store (s16) into stack)
+  ; CHECK-NEXT:   STRSP16 [[COPY3]], $sp, 14 :: (store (s16) into stack + 14)
+  ; CHECK-NEXT:   $r1 = COPY [[LDRSP16_]]
+  ; CHECK-NEXT:   $r2 = COPY [[LDRSP16_1]]
+  ; CHECK-NEXT:   $r3 = COPY [[LDRSP16_2]]
+  ; CHECK-NEXT:   CALL @lotsOfArgs2, csr, implicit-def dead $r0, implicit $sp, implicit $r1, implicit $r2, implicit $r3, implicit-def $sp, implicit-def $r1
+  ; CHECK-NEXT:   ADJCALLSTACKUP 16, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   [[COPY5:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   [[ADDi16rr:%[0-9]+]]:gpr16 = ADDi16rr [[COPY3]], [[COPY4]]
+  ; CHECK-NEXT:   [[ADDi16rr1:%[0-9]+]]:gpr16 = ADDi16rr [[LDRSP16_1]], killed [[ADDi16rr]]
+  ; CHECK-NEXT:   [[ADDi16rr2:%[0-9]+]]:gpr16 = ADDi16rr killed [[ADDi16rr1]], [[COPY5]]
+  ; CHECK-NEXT:   $r1 = COPY [[ADDi16rr2]]
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  %tmp = call i16 @lotsOfArgs2(i16 %a1, i16 %a2, i16 %a3, i16 %a4, i16 %a5, i16 %a6, i16 %a7, i16 %a8, i16 %a9, i16 %a10, i16 %a11)
+  %tmp0 = call i16 @lotsOfArgs2(i16 %a11, i16 %a10, i16 %a9, i16 %a8, i16 %a7, i16 %a6, i16 %a5, i16 %a4, i16 %a3, i16 %a2, i16 %a1)
+  %tmp1 = add i16 %a1, %tmp
+  %tmp2 = add i16 %a10, %tmp1
+  %res = add i16 %tmp2, %tmp0
+  ret i16 %res
+}

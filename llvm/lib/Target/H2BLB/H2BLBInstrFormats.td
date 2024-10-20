@@ -12,14 +12,18 @@
 
 // classes for operand types.
 class AsmImmRange<int Low, int High> : AsmOperandClass {
-  let Name = "Imm" # Low # "_" # High;
-  let DiagnosticType = "InvalidImm" # Low # "_" # High;
+  string StrLow = !if(!lt(Low, 0), "N" # !mul(Low, -1), "" # Low);
+  let Name = "Imm" # StrLow # "_" # High;
+  let DiagnosticType = "InvalidImm" # StrLow # "_" # High;
   let RenderMethod = "addImmOperands";
   let PredicateMethod = "isImmInRange<" # Low # "," # High # ">";
 }
 
 def uimm7 : Operand<i16>, ImmLeaf<i16, [{return Imm >= 0 && Imm < 128;}]> {
   let ParserMatchClass = AsmImmRange<0, 127>;
+}
+def simm7 : Operand<i16>, ImmLeaf<i16, [{return Imm >= -64 && Imm < 63;}]> {
+  let ParserMatchClass = AsmImmRange<-64, 63>;
 }
 
 def uimm4 : Operand<i16>, ImmLeaf<i16, [{return Imm >= 0 && Imm < 16;}]> {
@@ -133,4 +137,16 @@ class H2BLBMoveInstruction<string asm,
   let Inst{9-7} = dst;
   let Inst{6-4} = src;
   let Inst{3-0} = 0;
+}
+
+class H2BLBStoreSPInstruction<string asm,
+                              bit is32Bit = 0,
+                              RegisterClass SrcRC = !if(is32Bit, GPR32, GPR16)>
+          : H2BLBInstruction<asm, "$src, $sp, $offset", /*opcode=*/0b01000, is32Bit,
+                             (outs), (ins SrcRC:$src, OnlySP:$sp, simm7:$offset)> {
+  let mayStore = 1;
+  bits<3> src;
+  bits<7> offset;
+  let Inst{9-7} = src;
+  let Inst{6-0} = offset;
 }

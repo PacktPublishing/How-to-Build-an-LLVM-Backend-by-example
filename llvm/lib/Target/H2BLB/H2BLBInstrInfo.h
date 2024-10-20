@@ -25,6 +25,18 @@ class H2BLBInstrInfo : public H2BLBGenInstrInfo {
 public:
   H2BLBInstrInfo();
 
+  void storeRegToStackSlot(MachineBasicBlock &MBB,
+                           MachineBasicBlock::iterator MBBI, Register SrcReg,
+                           bool isKill, int FI, const TargetRegisterClass *RC,
+                           const TargetRegisterInfo *TRI,
+                           Register VReg) const override;
+
+  void loadRegFromStackSlot(MachineBasicBlock &MBB,
+                            MachineBasicBlock::iterator MBBI, Register DestReg,
+                            int FI, const TargetRegisterClass *RC,
+                            const TargetRegisterInfo *TRI,
+                            Register VReg) const override;
+
   /// Callback to materialize a register-to-regiter copy before \p MI in
   /// \p MBB. The copy to materialize is DestReg = COPY SrcReg. The opcode
   /// of the COPY needs to be the actual target-specific opcode.

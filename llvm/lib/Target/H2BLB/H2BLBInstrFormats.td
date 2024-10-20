@@ -150,3 +150,15 @@ class H2BLBStoreSPInstruction<string asm,
   let Inst{9-7} = src;
   let Inst{6-0} = offset;
 }
+
+class H2BLBLoadSPInstruction<string asm,
+                              bit is32Bit = 0,
+                              RegisterClass DstRC = !if(is32Bit, GPR32, GPR16)>
+          : H2BLBInstruction<asm, "$dst, $sp, $offset", /*opcode=*/0b01001, is32Bit,
+                             (outs DstRC:$dst), (ins OnlySP:$sp, simm7:$offset)> {
+  let mayLoad = 1;
+  bits<3> dst;
+  bits<7> offset;
+  let Inst{9-7} = dst;
+  let Inst{6-0} = offset;
+}

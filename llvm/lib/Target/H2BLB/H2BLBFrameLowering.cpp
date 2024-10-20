@@ -25,7 +25,30 @@ bool H2BLBFrameLowering::hasFP(const MachineFunction &MF) const {
 }
 
 void H2BLBFrameLowering::emitPrologue(MachineFunction &MF,
-                                      MachineBasicBlock &MBB) const {}
+                                      MachineBasicBlock &MBB) const {
+  MachineFrameInfo &MFI = MF.getFrameInfo();
+  // Get the number of bytes to allocate from the FrameInfo.
+  unsigned NumBytes = MFI.getStackSize();
+
+  if (NumBytes > 0) {
+    const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo();
+    BuildMI(MBB, MBB.begin(), DebugLoc(), TII->get(H2BLB::SUBSP), H2BLB::SP)
+        .addReg(H2BLB::SP)
+        .addImm(NumBytes);
+  }
+}
 
 void H2BLBFrameLowering::emitEpilogue(MachineFunction &MF,
-                                      MachineBasicBlock &MBB) const {}
+                                      MachineBasicBlock &MBB) const {
+  MachineFrameInfo &MFI = MF.getFrameInfo();
+  // Get the number of bytes to allocate from the FrameInfo.
+  unsigned NumBytes = MFI.getStackSize();
+
+  if (NumBytes > 0) {
+    const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo();
+    BuildMI(MBB, MBB.getFirstTerminator(), DebugLoc(), TII->get(H2BLB::ADDSP),
+            H2BLB::SP)
+        .addReg(H2BLB::SP)
+        .addImm(NumBytes);
+  }
+}

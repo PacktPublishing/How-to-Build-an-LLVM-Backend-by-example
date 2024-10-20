@@ -144,3 +144,10 @@ def LDRSP16: H2BLBLoadSPInstruction<"ldrsp16", /*is32Bit=*/0> {
 }
 def LDRSP32: H2BLBLoadSPInstruction<"ldrsp32", /*is32Bit=*/1> {
 }
+
+def ADDSP : H2BLBBinarySPInstruction<"addsp",
+                                     /*opcode=*/0b01010,
+                                     /*isAdd=*/true>;
+def SUBSP : H2BLBBinarySPInstruction<"subsp",
+                                     /*opcode=*/0b01010,
+                                     /*isAdd=*/false>;

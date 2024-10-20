@@ -34,6 +34,7 @@ def uimm4 : Operand<i16>, ImmLeaf<i16, [{return Imm >= 0 && Imm < 16;}]> {
 }
 
 def addrmode : ComplexPattern<iPTR, 2, "selectAddrMode", []>;
+def spaddrmode : ComplexPattern<iPTR, 2, "selectSPAddrMode", []>;
 
 
 // Instruction templates.

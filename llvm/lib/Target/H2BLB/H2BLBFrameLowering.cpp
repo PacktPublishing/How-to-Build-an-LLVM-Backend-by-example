@@ -60,12 +60,13 @@ MachineBasicBlock::iterator H2BLBFrameLowering::eliminateCallFramePseudoInstr(
   const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo();
   unsigned Opc = MI->getOpcode();
 
+  // The call frame should always be included in the stack frame in the
+  // prologue.
+  assert(hasReservedCallFrame(MF) && "H2BLB doesn't have a FP register");
+
   if (Opc != TII->getCallFrameSetupOpcode() &&
       Opc != TII->getCallFrameDestroyOpcode())
     report_fatal_error("Unexpected frame pseudo instruction");
-
-  if (MI->getOperand(0).getImm() != 0)
-    report_fatal_error("Proper frame lowering not yet implemented");
 
   if (MI->getOperand(1).getImm() != 0)
     report_fatal_error("Callee pop count not supported");

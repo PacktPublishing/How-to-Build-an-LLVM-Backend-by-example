@@ -53,3 +53,49 @@ define <2 x i16> @twoArgsi16(i16 %arg, i16 %arg1) {
   %res = insertelement <2 x i16> %partial, i16 %arg1, i32 1
   ret <2 x i16> %res
 }
+
+; Check that we properly set r1 as the input argument for the call.
+; The store and load are here to save and restore our link register.
+define i16 @callAFctWithOneArg(i16 %arg) {
+; CHECK-LABEL: callAFctWithOneArg:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    subsp sp, sp, 8
+; CHECK-NEXT:    strsp16 r0, sp, 6 # 2-byte Folded Spill
+; CHECK-NEXT:    call oneArgi16
+; CHECK-NEXT:    ldrsp16 r0, sp, 6 # 2-byte Folded Reload
+; CHECK-NEXT:    addsp sp, sp, 8
+; CHECK-NEXT:    ret
+  %res = call i16 @oneArgi16(i16 %arg)
+  ret i16 %res
+}
+
+declare i16 @arg16_32(i16, i32)
+
+; Check that we set r1 and d1 as the input argument for the call.
+define i16 @callAFctWithArg16_32(i16 %arg, i32 %arg1) {
+; CHECK-LABEL: callAFctWithArg16_32:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    subsp sp, sp, 8
+; CHECK-NEXT:    strsp16 r0, sp, 6 # 2-byte Folded Spill
+; CHECK-NEXT:    call arg16_32
+; CHECK-NEXT:    ldrsp16 r0, sp, 6 # 2-byte Folded Reload
+; CHECK-NEXT:    addsp sp, sp, 8
+; CHECK-NEXT:    ret
+  %res = call i16 @arg16_32(i16 %arg, i32 %arg1)
+  ret i16 %res
+}
+
+declare i16 @arg16_16(i16, i16)
+
+define i16 @callAFctWithTwoI16Arg(i16 %arg, i16 %arg1) {
+; CHECK-LABEL: callAFctWithTwoI16Arg:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    subsp sp, sp, 8
+; CHECK-NEXT:    strsp16 r0, sp, 6 # 2-byte Folded Spill
+; CHECK-NEXT:    call arg16_16
+; CHECK-NEXT:    ldrsp16 r0, sp, 6 # 2-byte Folded Reload
+; CHECK-NEXT:    addsp sp, sp, 8
+; CHECK-NEXT:    ret
+  %res = call i16 @arg16_16(i16 %arg, i16 %arg1)
+  ret i16 %res
+}

@@ -134,3 +134,8 @@ def MOVFROMSP: H2BLBInstruction<"movfromsp", "$dst, $sp",
   let Inst{6-4} = sp;
   let Inst{3-0} = 0;
 }
+
+def STRSP16: H2BLBStoreSPInstruction<"strsp16", /*is32Bit=*/0> {
+}
+def STRSP32: H2BLBStoreSPInstruction<"strsp32", /*is32Bit=*/1> {
+}

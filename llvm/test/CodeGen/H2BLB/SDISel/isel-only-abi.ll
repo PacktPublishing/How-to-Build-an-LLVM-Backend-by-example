@@ -122,8 +122,8 @@ define i16 @fourArgsi16(i16 %arg, i16 %arg1, i16 %arg2, i16 %arg3) {
   ; CHECK-NEXT:   liveins: $r0
   ; CHECK-NEXT: {{  $}}
   ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
-  ; CHECK-NEXT:   [[LDR16_:%[0-9]+]]:gpr16 = LDR16 %fixed-stack.0, 0 :: (load (s16) from %fixed-stack.0, align 8)
-  ; CHECK-NEXT:   $r1 = COPY [[LDR16_]]
+  ; CHECK-NEXT:   [[LDRSP16_:%[0-9]+]]:gpr16 = LDRSP16 %fixed-stack.0, 0 :: (load (s16) from %fixed-stack.0, align 8)
+  ; CHECK-NEXT:   $r1 = COPY [[LDRSP16_]]
   ; CHECK-NEXT:   $r0 = COPY [[COPY]]
   ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
   ret i16 %arg3

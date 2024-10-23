@@ -15,7 +15,12 @@
 #include "H2BLBTargetObjectFile.h"
 #include "H2BLBTargetTransformInfo.h"
 #include "TargetInfo/H2BLBTargetInfo.h" // For getTheH2BLBTarget.
+#include "llvm/CodeGen/GlobalISel/IRTranslator.h"
+#include "llvm/CodeGen/GlobalISel/InstructionSelect.h"
+#include "llvm/CodeGen/GlobalISel/Legalizer.h"
+#include "llvm/CodeGen/GlobalISel/RegBankSelect.h"
 #include "llvm/CodeGen/TargetPassConfig.h"
+#include "llvm/InitializePasses.h" // For initializeGlobalISel.
 #include "llvm/MC/TargetRegistry.h" // For RegisterTargetMachine.
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Support/CodeGen.h"  // For CodeGenOptLevel.
@@ -30,6 +35,7 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeH2BLBTarget() {
 
   PassRegistry &PR = *PassRegistry::getPassRegistry();
   initializeH2BLBSimpleConstantPropagationPass(PR);
+  initializeGlobalISel(PR);
 }
 
 static std::unique_ptr<TargetLoweringObjectFile> createTLOF(const Triple &TT) {
@@ -108,6 +114,26 @@ H2BLBPassConfig::H2BLBPassConfig(LLVMTargetMachine &TM, PassManagerBase &PM)
 
 bool H2BLBPassConfig::addInstSelector() {
   addPass(createH2BLBISelDAG(getH2BLBTargetMachine()));
+  return false;
+}
+
+bool H2BLBPassConfig::addIRTranslator() {
+  addPass(new IRTranslator(getOptLevel()));
+  return false;
+}
+
+bool H2BLBPassConfig::addLegalizeMachineIR() {
+  addPass(new Legalizer());
+  return false;
+}
+
+bool H2BLBPassConfig::addRegBankSelect() {
+  addPass(new RegBankSelect());
+  return false;
+}
+
+bool H2BLBPassConfig::addGlobalInstructionSelect() {
+  addPass(new InstructionSelect(getOptLevel()));
   return false;
 }
 

@@ -12,8 +12,12 @@ tablegen(LLVM H2BLBGenAsmMatcher.inc -gen-asm-matcher)
 # Encoding.
 tablegen(LLVM H2BLBGenMCCodeEmitter.inc -gen-emitter)
 tablegen(LLVM H2BLBGenCallingConv.inc -gen-callingconv)
+# SDISel
 tablegen(LLVM H2BLBGenDAGISel.inc -gen-dag-isel)
+# FastISel
 tablegen(LLVM H2BLBGenFastISel.inc -gen-fast-isel)
+# GlobalISel
+tablegen(LLVM H2BLBGenRegisterBank.inc -gen-register-bank)
 
 add_public_tablegen_target(H2BLBCommonTableGen)
 
@@ -36,6 +40,7 @@ add_llvm_target(H2BLBCodeGen
 
   # GlobalISel related files.
   GISel/H2BLBCallLowering.cpp
+  GISel/H2BLBRegisterBankInfo.cpp
 
   LINK_COMPONENTS
   H2BLBDesc

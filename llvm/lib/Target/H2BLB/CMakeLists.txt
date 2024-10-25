@@ -18,6 +18,7 @@ tablegen(LLVM H2BLBGenDAGISel.inc -gen-dag-isel)
 tablegen(LLVM H2BLBGenFastISel.inc -gen-fast-isel)
 # GlobalISel
 tablegen(LLVM H2BLBGenRegisterBank.inc -gen-register-bank)
+tablegen(LLVM H2BLBGenGlobalISel.inc -gen-global-isel)
 
 add_public_tablegen_target(H2BLBCommonTableGen)
 
@@ -40,6 +41,7 @@ add_llvm_target(H2BLBCodeGen
 
   # GlobalISel related files.
   GISel/H2BLBCallLowering.cpp
+  GISel/H2BLBInstructionSelector.cpp
   GISel/H2BLBLegalizerInfo.cpp
   GISel/H2BLBRegisterBankInfo.cpp
 

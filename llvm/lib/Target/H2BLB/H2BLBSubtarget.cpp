@@ -13,6 +13,7 @@
 #include "H2BLBSubtarget.h"
 #include "GISel/H2BLBCallLowering.h"
 #include "GISel/H2BLBLegalizerInfo.h"
+#include "GISel/H2BLBRegisterBankInfo.h"
 #include "llvm/Target/TargetMachine.h"
 
 using namespace llvm;
@@ -32,6 +33,7 @@ H2BLBSubtarget::H2BLBSubtarget(const Triple &TT, StringRef CPU, StringRef FS,
       TLInfo(TM, *this) {
   CallLoweringInfo.reset(new H2BLBCallLowering(*getTargetLowering()));
   Legalizer.reset(new H2BLBLegalizerInfo(*this));
+  RegBankInfo.reset(new H2BLBRegisterBankInfo(*getRegisterInfo()));
 }
 
 const CallLowering *H2BLBSubtarget::getCallLowering() const {
@@ -40,4 +42,8 @@ const CallLowering *H2BLBSubtarget::getCallLowering() const {
 
 const LegalizerInfo *H2BLBSubtarget::getLegalizerInfo() const {
   return Legalizer.get();
+}
+
+const RegisterBankInfo *H2BLBSubtarget::getRegBankInfo() const {
+  return RegBankInfo.get();
 }

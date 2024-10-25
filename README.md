@@ -4,6 +4,10 @@ This will be linked to the main repo for this title.
 The purpose of this repository is to offer a step by step implementation of an LLVM backend from scratch.
 Use the begin_chXX end_chXX tags to follow what we do in the related chapters.
 
+This repo also contains a `h2blb_utils` directory that contains a script that can be used to reset the tags
+referenced in the book so that they point to the relevant commits after an LLVM rebase for instance.
+
+
 Below follows the original README.md
 
 # The LLVM Compiler Infrastructure

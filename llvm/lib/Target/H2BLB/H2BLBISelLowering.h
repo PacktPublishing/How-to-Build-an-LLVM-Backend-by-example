@@ -32,6 +32,9 @@ class H2BLBTargetMachine;
 class H2BLBTargetLowering : public TargetLowering {
   const H2BLBSubtarget &Subtarget;
 
+  /// Custom inserter for the RET_PSEUDO instruction.
+  MachineBasicBlock *emitRET_PSEUDO(MachineInstr &MI) const;
+
 public:
   explicit H2BLBTargetLowering(const TargetMachine &TM,
                                const H2BLBSubtarget &STI);
@@ -75,6 +78,10 @@ public:
   /// grab callee resulting values..
   SDValue LowerCall(CallLoweringInfo &CLI,
                     SmallVectorImpl<SDValue> &InVals) const override;
+
+  MachineBasicBlock *
+  EmitInstrWithCustomInserter(MachineInstr &MI,
+                              MachineBasicBlock *BB) const override;
 
   /// Perform the last clean-ups after finishing instruction selection.
   void finalizeLowering(MachineFunction &MF) const override;

@@ -56,6 +56,7 @@ public:
   bool addInstSelector() override;
   void addIRPasses() override;
   bool addIRTranslator() override;
+  void addPreLegalizeMachineIR() override;
   bool addLegalizeMachineIR() override;
   bool addRegBankSelect() override;
   bool addGlobalInstructionSelect() override;

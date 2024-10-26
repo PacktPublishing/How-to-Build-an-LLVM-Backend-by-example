@@ -39,6 +39,10 @@ Pass *createH2BLBSimpleConstantPropagationPassForLegacyPM();
 
 void initializeH2BLBDAGToDAGISelLegacyPass(PassRegistry &);
 Pass *createH2BLBISelDAG(H2BLBTargetMachine &TM);
+
+void initializeH2BLBMandatoryPreLegalizerCombinerPass(PassRegistry &);
+Pass *createH2BLBMandatoryPreLegalizerCombiner();
+
 namespace H2BLB {
 FastISel *createFastISel(FunctionLoweringInfo &FuncInfo,
                          const TargetLibraryInfo *LibInfo);

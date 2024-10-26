@@ -12,6 +12,7 @@
 
 #include "H2BLBSubtarget.h"
 #include "GISel/H2BLBCallLowering.h"
+#include "GISel/H2BLBLegalizerInfo.h"
 #include "GISel/H2BLBRegisterBankInfo.h"
 #include "H2BLB.h" // For H2BLB::createInstructionSelector.
 #include "H2BLBTargetMachine.h"
@@ -33,6 +34,7 @@ H2BLBSubtarget::H2BLBSubtarget(const Triple &TT, StringRef CPU, StringRef FS,
     : H2BLBGenSubtargetInfo(TT, CPU, /*TuneCPU=*/"", FS), FrameLowering(*this),
       TLInfo(TM, *this) {
   CallLoweringInfo.reset(new H2BLBCallLowering(*getTargetLowering()));
+  Legalizer.reset(new H2BLBLegalizerInfo(*this));
   auto *RBI = new H2BLBRegisterBankInfo(*getRegisterInfo());
   RegBankInfo.reset(RBI);
   InstrSelector.reset(H2BLB::createInstructionSelector(
@@ -41,6 +43,10 @@ H2BLBSubtarget::H2BLBSubtarget(const Triple &TT, StringRef CPU, StringRef FS,
 
 const CallLowering *H2BLBSubtarget::getCallLowering() const {
   return CallLoweringInfo.get();
+}
+
+const LegalizerInfo *H2BLBSubtarget::getLegalizerInfo() const {
+  return Legalizer.get();
 }
 
 const RegisterBankInfo *H2BLBSubtarget::getRegBankInfo() const {

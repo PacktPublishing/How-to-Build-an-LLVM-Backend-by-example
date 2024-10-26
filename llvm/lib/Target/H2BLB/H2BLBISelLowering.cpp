@@ -333,6 +333,10 @@ SDValue H2BLBTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
 }
 
 void H2BLBTargetLowering::finalizeLowering(MachineFunction &MF) const {
+  // GISel already call this method so don't call it twice.
+if (MF.getProperties().hasProperty(
+      MachineFunctionProperties::Property::Selected))
+    return;
   const TargetInstrInfo &TII = *Subtarget.getInstrInfo();
   MachineRegisterInfo &MRI = MF.getRegInfo();
   Register SavedLR = MRI.createVirtualRegister(&H2BLB::GPR16RegClass);

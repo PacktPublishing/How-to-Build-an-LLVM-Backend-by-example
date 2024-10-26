@@ -12,5 +12,4 @@
 //===----------------------------------------------------------------------===//
 
 /// General Purpose Registers
-def GPRRegBank : RegisterBank<"GPRB", [GPR32, GPR16sp]>;
-
+def GPRBRegBank : RegisterBank<"GPRB", [GPR32, GPR16sp]>;

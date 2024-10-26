@@ -79,10 +79,36 @@ H2BLBInstructionSelector::H2BLBInstructionSelector(
 }
 
 bool H2BLBInstructionSelector::select(MachineInstr &I) {
-  if (!isPreISelGenericOpcode(I.getOpcode()))
+  unsigned Opc = I.getOpcode();
+  if (!isPreISelGenericOpcode(Opc) && Opc != TargetOpcode::PHI && Opc != TargetOpcode::COPY)
     return true;
+
+  MachineBasicBlock &MBB = *I.getParent();
+  MachineFunction &MF = *MBB.getParent();
+  MachineRegisterInfo &MRI = MF.getRegInfo();
+
+  switch (Opc) {
+  case TargetOpcode::G_PHI:
+    I.setDesc(TII.get(TargetOpcode::PHI));
+    [[fallthrough]];
+  case TargetOpcode::PHI:
+  case TargetOpcode::COPY:
+    // For PHIs and COPYs, we only need to assigned a register class.
+    for (MachineOperand &MO : I.operands()) {
+      Register Reg = MO.getReg();
+      if (Reg.isPhysical())
+        continue;
+      const TargetRegisterClass *RC = MRI.getRegClassOrNull(Reg);
+      if (RC)
+        continue;
+      unsigned Size = MRI.getType(Reg).getSizeInBits();
+      MRI.setRegClass(Reg, Size == 16? &H2BLB::GPR16spRegClass: &H2BLB::GPR32RegClass);
+    }
+    return true;
+  default:
   if (selectImpl(I, *CoverageInfo))
     return true;
+  }
   return false;
 }
 

@@ -30,16 +30,16 @@ public:
     resetDataLayout(
         // Little-endian.
         "e-"
-        // Pointer size is 16-bit and the alignment matches.
-        "p:16:16:16-"
+        // Pointer size is 16-bit and aligned on 8-bit.
+        "p:16:8:8-"
         // Supports natively 16-bit and 32-bit integer.
         "n16:32-"
-        // i32 are aligned on 32, i16 on 16 and i1 on 8.
-        "i32:32:32-i16:16:16-i1:8:8-"
-        // f32 aligned on 32-bit.
-        "f32:32:32-"
-        // v32 aligned on 32-bit.
-        "v32:32:32");
+        // i32 are aligned on 8, i16 on 8 and i1 on 8.
+        "i32:8:8-i16:8:8-i1:8:8-"
+        // f32 aligned on 8-bit.
+        "f32:8:8-"
+        // v32 aligned on 8-bit.
+        "v32:8:8");
   }
 
   /// Appends the target-specific \#define values for this

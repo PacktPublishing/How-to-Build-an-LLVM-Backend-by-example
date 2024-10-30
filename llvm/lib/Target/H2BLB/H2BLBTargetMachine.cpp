@@ -50,7 +50,7 @@ static std::unique_ptr<TargetLoweringObjectFile> createTLOF(const Triple &TT) {
 
 // TODO: Share this with Clang.
 static const char *H2BLBDataLayoutStr =
-    "e-p:16:16:16-n16:32-i32:32:32-i16:16:16-i1:8:8-f32:32:32-v32:32:32";
+    "e-p:16:8:8-n16:32-i32:8:8-i16:8:8-i1:8:8-f32:8:8-v32:8:8";
 
 H2BLBTargetMachine::H2BLBTargetMachine(const Target &T, const Triple &TT,
                                        StringRef CPU, StringRef FS,

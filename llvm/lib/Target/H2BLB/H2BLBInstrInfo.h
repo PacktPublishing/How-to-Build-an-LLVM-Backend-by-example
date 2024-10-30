@@ -43,6 +43,9 @@ public:
   void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator MI,
                    const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
                    bool KillSrc) const override;
+
+  ArrayRef<std::pair<int, const char *>>
+  getSerializableTargetIndices() const override;
 };
 } // namespace llvm
 

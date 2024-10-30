@@ -75,8 +75,6 @@ H2BLBRegisterBankInfo::getInstrMapping(const MachineInstr &MI) const {
 
   const MachineFunction &MF = *MI.getParent()->getParent();
   const MachineRegisterInfo &MRI = MF.getRegInfo();
-  const TargetSubtargetInfo &STI = MF.getSubtarget();
-  const TargetRegisterInfo &TRI = *STI.getRegisterInfo();
 
   unsigned NumOperands = MI.getNumOperands();
   const ValueMapping *GPR16ValueMapping = &H2BLB::ValueMappings[H2BLB::GPRB16Idx];

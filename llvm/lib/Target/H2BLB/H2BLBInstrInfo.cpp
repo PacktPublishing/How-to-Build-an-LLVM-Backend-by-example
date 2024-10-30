@@ -95,3 +95,11 @@ void H2BLBInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
   BuildMI(MBB, MI, MI->getDebugLoc(), get(Opc), DestReg)
       .addReg(SrcReg, getKillRegState(KillSrc));
 }
+
+ArrayRef<std::pair<int, const char *>>
+H2BLBInstrInfo::getSerializableTargetIndices() const {
+  static const std::pair<int, const char *> TargetIndices[] = {
+      {0, "h2blb-stack-offset"},
+  };
+  return ArrayRef(TargetIndices);
+}

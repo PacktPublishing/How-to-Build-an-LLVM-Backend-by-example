@@ -56,18 +56,12 @@ def RETURN : H2BLBNoOperandInstruction<"ret",
 let isReturn = 1, isTerminator = 1, isBarrier = 1 in
 def RET_PSEUDO : H2BLBPseudoInstruction<(outs), (ins), []>;
 
-let isAsCheapAsAMove = 1, isMoveImm = 1, isReMaterializable = 1 in
-def LD16imm7 : H2BLBInstruction<"ldi16", "$dst, $imm7",
+def LD16imm7 : H2BLBLoadImmediate<"ldi16",
                                  /*opcode=*/0b00010,
-                                 /*is32Bit=*/0,
-                                 /*oops=*/(outs GPR16:$dst),
-                                 /*iops=*/(ins uimm7:$imm7)> {
-  bits<3> dst;
-  bits<7> imm7;
-  let Inst{9-7} = dst;
-  let Inst{6-0} = imm7;
-  let Pattern = [(set GPR16:$dst, uimm7:$imm7)];
-}
+                                 /*is32Bit=*/0>;
+def LD32imm7 : H2BLBLoadImmediate<"ldi32",
+                                 /*opcode=*/0b00010,
+                                 /*is32Bit=*/1>;
 
 def LD16imm16 : H2BLBPseudoInstruction<(outs GPR16:$dst), (ins i16imm:$src),
                                        [(set GPR16:$dst, imm:$src)]>;
@@ -113,6 +107,22 @@ def STR32 : H2BLBStoreInstruction<"str32",
   let Pattern = [(store (i32 GPR32:$src), (addrmode GPR16:$addr, uimm4:$offset))];
 }
 
+def TRUNCSTR8: H2BLBInstruction<"truncstr8", "$src, $addr, $offset",
+                                 /*opcode=*/0b01111,
+                                 /*unusedBit=*/0,
+                                 /*oops=*/(outs),
+                                 /*iops=*/(ins GPR16:$src, GPR16:$addr, uimm4:$offset)> {
+  let mayStore = 1;
+  bits<3> src;
+  bits<3> addr;
+  bits<4> offset;
+  let Inst{9-7} = src;
+  let Inst{6-4} = addr;
+  let Inst{3-0} = offset;
+  let Pattern = [(truncstorei8 (i16 GPR16:$src), (addrmode GPR16:$addr, uimm4:$offset))];
+}
+def : Pat<(store (i8 (trunc GPR16:$src)), (addrmode GPR16:$addr, uimm4:$offset)), (TRUNCSTR8 GPR16:$src, GPR16:$addr, uimm4:$offset)>;
+
 def MOV16 : H2BLBMoveInstruction<"mov16", /*is32Bit=*/0>;
 def MOV32 : H2BLBMoveInstruction<"mov32", /*is32Bit=*/1>;
 
@@ -155,7 +165,17 @@ def LDRSP16: H2BLBLoadSPInstruction<"ldrsp16", /*is32Bit=*/0> {
 def LDRSP32: H2BLBLoadSPInstruction<"ldrsp32", /*is32Bit=*/1> {
   let Pattern = [(set GPR32:$dst, (load (spaddrmode OnlySP:$sp, simm7:$offset)))];
 }
+
+def LDRSEXTSP8: H2BLBExtLoadSPInstruction<"ldrsextsp8", /*isZExt=*/0> {
+  let Pattern = [(set GPR16:$dst, (sextload (spaddrmode OnlySP:$sp, simm7:$offset)))];
+}
+def LDRZEXTSP8: H2BLBExtLoadSPInstruction<"ldrsextsp8", /*isZExt=*/1> {
+  let Pattern = [(set GPR16:$dst, (zextload (spaddrmode OnlySP:$sp, simm7:$offset)))];
+}
 } // end AddedComplexity.
+
+// Match any_ext(load) on zextload.
+def : Pat<(i16 (extload (spaddrmode OnlySP:$sp, simm7:$offset))), (LDRZEXTSP8 OnlySP:$sp, simm7:$offset)>;
 
 def ADDSP : H2BLBBinarySPInstruction<"addsp",
                                      /*opcode=*/0b01010,

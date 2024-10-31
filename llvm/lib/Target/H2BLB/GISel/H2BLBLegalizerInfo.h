@@ -15,14 +15,25 @@
 #include "llvm/CodeGen/GlobalISel/LegalizerInfo.h"
 
 namespace llvm {
+class MachineIRBuilder;
+class GISelChangeObserver;
 
 class H2BLBSubtarget;
 
 /// This class provides the information for the H2BLB target legalizer for
 /// GlobalISel.
 class H2BLBLegalizerInfo : public LegalizerInfo {
+  const H2BLBSubtarget &ST;
+
+  bool legalizeMul(MachineInstr &MI, MachineRegisterInfo &MRI,
+                   MachineIRBuilder &MIRBuilder,
+                   GISelChangeObserver &Observer) const;
+
 public:
   H2BLBLegalizerInfo(const H2BLBSubtarget &ST);
+
+  bool legalizeCustom(LegalizerHelper &Helper, MachineInstr &MI,
+                      LostDebugLocObserver &LocObserver) const override;
 };
 } // namespace llvm
 #endif

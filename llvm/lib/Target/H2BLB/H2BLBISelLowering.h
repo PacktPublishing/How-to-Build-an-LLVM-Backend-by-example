@@ -41,6 +41,18 @@ public:
   FastISel *createFastISel(FunctionLoweringInfo &funcInfo,
                            const TargetLibraryInfo *libInfo) const override;
 
+  /// Check whether the memory access described here can be accessed with an
+  /// alignment smaller than what the datalayout describes.
+  bool allowsMisalignedMemoryAccesses(EVT VT, unsigned AddrSpace,
+                                      Align Alignment,
+                                      MachineMemOperand::Flags Flags,
+                                      unsigned *Fast) const override;
+
+  bool allowsMisalignedMemoryAccesses(LLT Ty, unsigned AddrSpace,
+                                      Align Alignment,
+                                      MachineMemOperand::Flags Flags,
+                                      unsigned *Fast) const override;
+
   /// This hook must be implemented to lower the incoming (formal) arguments,
   /// described by the Ins array, into the specified DAG. The implementation
   /// should fill in the InVals array with legal-type argument values, and

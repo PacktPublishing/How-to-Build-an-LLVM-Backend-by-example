@@ -107,6 +107,24 @@ class H2BLBNoOperandInstruction<string asm,
   let Inst{9-1} = 0;
 }
 
+class H2BLBWidenIMul<string asm, bit isSign>
+          : H2BLBInstruction<asm, /*operands=*/"$dst, $src0, $src1",
+                             /*opcode=*/0, isSign, /*oops=*/(outs GPR32:$dst),
+                             /*iops=*/(ins GPR16:$src0, GPR16:$src1)> {
+  bits<2> dst;
+  bits<3> src0;
+  bits<3> src1;
+  // Since dst is between d0 and d3, we know two bits are enough.
+  // Save one bit for more opcodes.
+  // For a real target, we wouldn't need to scrap bits on the go :).
+  let Inst{9} = 0;
+  let Inst{8-7} = dst;
+  let Inst{6-4} = src0;
+  let Inst{3-1} = src1;
+  // This is how we differentiate ourselves from the encoding of ADDi16rr.
+  let Inst{0} = 1;
+}
+
 class H2BLBLoadImmediate<string asm,
                          bits<5> opcode,
                          bit is32Bit,

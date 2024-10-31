@@ -183,3 +183,6 @@ def ADDSP : H2BLBBinarySPInstruction<"addsp",
 def SUBSP : H2BLBBinarySPInstruction<"subsp",
                                      /*opcode=*/0b01010,
                                      /*isAdd=*/false>;
+
+def WIDENING_SMUL : H2BLBWidenIMul<"wsmul", /*isSign=*/1>;
+def WIDENING_UMUL : H2BLBWidenIMul<"wumul", /*isSign=*/0>;

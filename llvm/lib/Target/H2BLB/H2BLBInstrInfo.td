@@ -183,6 +183,7 @@ def ADDSP : H2BLBBinarySPInstruction<"addsp",
 def SUBSP : H2BLBBinarySPInstruction<"subsp",
                                      /*opcode=*/0b01010,
                                      /*isAdd=*/false>;
-
+let Pattern = [(set GPR32:$dst, (int_h2blb_widening_smul GPR16:$src0, GPR16:$src1))] in
 def WIDENING_SMUL : H2BLBWidenIMul<"wsmul", /*isSign=*/1>;
+let Pattern = [(set GPR32:$dst, (int_h2blb_widening_umul GPR16:$src0, GPR16:$src1))] in
 def WIDENING_UMUL : H2BLBWidenIMul<"wumul", /*isSign=*/0>;

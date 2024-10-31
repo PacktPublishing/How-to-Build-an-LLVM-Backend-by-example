@@ -44,6 +44,10 @@ H2BLBLegalizerInfo::H2BLBLegalizerInfo(const H2BLBSubtarget &ST) : ST(ST) {
                                {s16, p0, s16, 8},
                                 {s32, p0, s32, 8}})
       .clampScalar(0, s16, s32)
+      .lowerIf([=](const LegalityQuery &Query) {
+        return Query.Types[0].isScalar() &&
+               Query.Types[0] != Query.MMODescrs[0].MemoryTy;
+      })
 /*      .narrowScalarIf(
             [=](const LegalityQuery &Query) -> bool {
               const LLT DstTy = Query.Types[0];
@@ -65,8 +69,9 @@ H2BLBLegalizerInfo::H2BLBLegalizerInfo(const H2BLBSubtarget &ST) : ST(ST) {
       .legalFor({{p0, s16}});
 
   // Arithmetic.
-  getActionDefinitionsBuilder(TargetOpcode::G_ADD)
-      .legalFor({s16});
+  getActionDefinitionsBuilder({TargetOpcode::G_ADD, TargetOpcode::G_AND})
+      .legalFor({s16})
+      .clampScalar(0, s16, s32);
 
   getActionDefinitionsBuilder(TargetOpcode::G_MUL)
       .customIf([=](const LegalityQuery &Query) {

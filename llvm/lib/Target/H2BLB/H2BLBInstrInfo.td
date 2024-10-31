@@ -75,6 +75,14 @@ def LDR32 : H2BLBLoadInstruction<"ldr32",
                                  /*is32Bit=*/1> {
   let Pattern = [(set GPR32:$dst, (load (addrmode GPR16:$addr, uimm4:$offset)))];
 }
+def LDRSEXT8: H2BLBExtLoadInstruction<"ldrsext8", /*isZExt=*/0> {
+  let Pattern = [(set GPR16:$dst, (sextload (addrmode GPR16:$addr, uimm4:$offset)))];
+}
+def LDRZEXT8: H2BLBExtLoadInstruction<"ldrsext8", /*isZExt=*/1> {
+  let Pattern = [(set GPR16:$dst, (zextload (addrmode GPR16:$addr, uimm4:$offset)))];
+}
+// Match any_ext(load) on zextload.
+def : Pat<(i16 (extload (addrmode GPR16:$addr, simm7:$offset))), (LDRZEXT8 GPR16:$addr, uimm4:$offset)>;
 
 let isCall = 1, Defs = [R0], Uses = [SP] in
 def CALL : H2BLBInstruction<"call", "$tgt",
@@ -108,7 +116,7 @@ def STR32 : H2BLBStoreInstruction<"str32",
 }
 
 def TRUNCSTR8: H2BLBInstruction<"truncstr8", "$src, $addr, $offset",
-                                 /*opcode=*/0b01111,
+                                 /*opcode=*/0b01110,
                                  /*unusedBit=*/0,
                                  /*oops=*/(outs),
                                  /*iops=*/(ins GPR16:$src, GPR16:$addr, uimm4:$offset)> {
@@ -190,3 +198,12 @@ def WIDENING_UMUL : H2BLBWidenIMul<"wumul", /*isSign=*/0>;
 
 def : Pat<(i32 (mul (sext GPR16:$src0), (sext GPR16:$src1))), (WIDENING_SMUL $src0, $src1)>;
 def : Pat<(i32 (mul (zext GPR16:$src0), (zext GPR16:$src1))), (WIDENING_UMUL $src0, $src1)>;
+
+let Pattern = [(set GPR16:$dst, (and GPR16:$src0, GPR16:$src1))] in
+def AND16 : H2BLBBinaryInstruction<"and16",
+                                     /*opcode=*/0b01100,
+                                     /*is32Bit=*/false>;
+let Pattern = [(set GPR32:$dst, (and GPR32:$src0, GPR32:$src1))] in
+def AND32 : H2BLBBinaryInstruction<"and32",
+                                     /*opcode=*/0b01100,
+                                     /*is32Bit=*/true>;

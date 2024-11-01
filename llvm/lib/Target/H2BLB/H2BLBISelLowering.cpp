@@ -30,6 +30,9 @@ H2BLBTargetLowering::H2BLBTargetLowering(const TargetMachine &TM,
   addRegisterClass(MVT::f16, &H2BLB::GPR16RegClass);
   addRegisterClass(MVT::i32, &H2BLB::GPR32RegClass);
   addRegisterClass(MVT::f32, &H2BLB::GPR32RegClass);
+  addRegisterClass(MVT::v2i16, &H2BLB::GPR32RegClass);
+
+  setOperationAction(ISD::ADD, MVT::v2i16, Expand);
 
   // Tell the generic implementation that we are done with setting up our
   // register classes.

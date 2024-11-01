@@ -73,8 +73,11 @@ def LDR16 : H2BLBLoadInstruction<"ldr16",
 }
 def LDR32 : H2BLBLoadInstruction<"ldr32",
                                  /*is32Bit=*/1> {
-  let Pattern = [(set GPR32:$dst, (load (addrmode GPR16:$addr, uimm4:$offset)))];
+  let Pattern = [(set (i32 GPR32:$dst), (load (addrmode GPR16:$addr, uimm4:$offset)))];
 }
+def : Pat<(v2i16 (load (addrmode GPR16:$addr, uimm4:$offset))), (LDR32 $addr, $offset)>;
+
+
 def LDRSEXT8: H2BLBExtLoadInstruction<"ldrsext8", /*isZExt=*/0> {
   let Pattern = [(set GPR16:$dst, (sextload (addrmode GPR16:$addr, uimm4:$offset)))];
 }
@@ -114,6 +117,7 @@ def STR32 : H2BLBStoreInstruction<"str32",
                                  /*is32Bit=*/1> {
   let Pattern = [(store (i32 GPR32:$src), (addrmode GPR16:$addr, uimm4:$offset))];
 }
+def : Pat<(store (v2i16 GPR32:$src), (addrmode GPR16:$addr, uimm4:$offset)), (STR32 $src, $addr, $offset)>;
 
 def TRUNCSTR8: H2BLBInstruction<"truncstr8", "$src, $addr, $offset",
                                  /*opcode=*/0b01110,
@@ -171,7 +175,7 @@ def LDRSP16: H2BLBLoadSPInstruction<"ldrsp16", /*is32Bit=*/0> {
   let Pattern = [(set GPR16:$dst, (load (spaddrmode OnlySP:$sp, simm7:$offset)))];
 }
 def LDRSP32: H2BLBLoadSPInstruction<"ldrsp32", /*is32Bit=*/1> {
-  let Pattern = [(set GPR32:$dst, (load (spaddrmode OnlySP:$sp, simm7:$offset)))];
+  let Pattern = [(set (i32 GPR32:$dst), (load (spaddrmode OnlySP:$sp, simm7:$offset)))];
 }
 
 def LDRSEXTSP8: H2BLBExtLoadSPInstruction<"ldrsextsp8", /*isZExt=*/0> {
@@ -196,14 +200,25 @@ def WIDENING_SMUL : H2BLBWidenIMul<"wsmul", /*isSign=*/1>;
 let Pattern = [(set GPR32:$dst, (int_h2blb_widening_umul GPR16:$src0, GPR16:$src1))] in
 def WIDENING_UMUL : H2BLBWidenIMul<"wumul", /*isSign=*/0>;
 
-def : Pat<(i32 (mul (sext GPR16:$src0), (sext GPR16:$src1))), (WIDENING_SMUL $src0, $src1)>;
-def : Pat<(i32 (mul (zext GPR16:$src0), (zext GPR16:$src1))), (WIDENING_UMUL $src0, $src1)>;
+def : Pat<(i32 (mul (sext GPR16:$src0), (sext GPR16:$src1))), (WIDENING_SMUL GPR16:$src0, GPR16:$src1)>;
+def : Pat<(i32 (mul (zext GPR16:$src0), (zext GPR16:$src1))), (WIDENING_UMUL GPR16:$src0, GPR16:$src1)>;
 
 let Pattern = [(set GPR16:$dst, (and GPR16:$src0, GPR16:$src1))] in
 def AND16 : H2BLBBinaryInstruction<"and16",
                                      /*opcode=*/0b01100,
                                      /*is32Bit=*/false>;
-let Pattern = [(set GPR32:$dst, (and GPR32:$src0, GPR32:$src1))] in
+let Pattern = [(set (i32 GPR32:$dst), (and GPR32:$src0, GPR32:$src1))] in
 def AND32 : H2BLBBinaryInstruction<"and32",
                                      /*opcode=*/0b01100,
                                      /*is32Bit=*/true>;
+
+// Patterns to deal with breaking up a GPR32 into GPR16 chunks.
+def : GINodeEquiv<G_EXTRACT_VECTOR_ELT, vector_extract>;
+def : Pat<(vector_extract (v2i16 GPR32:$rs), (i16 0)),
+          (i16 (EXTRACT_SUBREG GPR32:$rs, sub_low16))>;
+def : Pat<(vector_extract (v2i16 GPR32:$rs), (i16 1)),
+          (i16 (EXTRACT_SUBREG GPR32:$rs, sub_high16))>;
+
+// Build a 32-bit register from 2 16-bit registers.
+def : Pat<(v2i16 (build_vector GPR16:$a, GPR16:$b)),
+          (v2i16 (REG_SEQUENCE GPR32, $a, sub_low16, $b, sub_high16))>;

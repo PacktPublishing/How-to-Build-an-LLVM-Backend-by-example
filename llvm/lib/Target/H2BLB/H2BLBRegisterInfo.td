@@ -51,7 +51,7 @@ def SP : H2BLBReg<0, "sp">;
 
 // Register classes.
 def GPR16 : RegisterClass<"H2BLB", [i16], 16, (sequence "R%u", 0, 7)>;
-def GPR32 : RegisterClass<"H2BLB", [i32], 32, (sequence "D%u", 0, 3)>;
+def GPR32 : RegisterClass<"H2BLB", [i32,v2i16], 32, (sequence "D%u", 0, 3)>;
 def OnlySP : RegisterClass<"H2BLB", [i16], 16, (add SP)>;
 def GPR16sp : RegisterClass<"H2BLB", [i16], 16, (add GPR16, OnlySP)>;
 } // end namespace H2BLB.

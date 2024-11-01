@@ -38,31 +38,37 @@ H2BLBLegalizerInfo::H2BLBLegalizerInfo(const H2BLBSubtarget &ST) : ST(ST) {
 
   // Load and store.
   getActionDefinitionsBuilder({TargetOpcode::G_LOAD, TargetOpcode::G_STORE})
-      .legalForTypesWithMemDesc(
-                               {{s8, p0, s8, 8},
-                               {s16, p0, s8, 8}, // anyext/truncstore
-                               {s16, p0, s16, 8},
-                                {s32, p0, s32, 8}})
+      .legalForTypesWithMemDesc({{s8, p0, s8, 8},
+                                 {s16, p0, s8, 8}, // anyext/truncstore
+                                 {s16, p0, s16, 8},
+                                 {s32, p0, s32, 8}})
       .clampScalar(0, s16, s32)
       .lowerIf([=](const LegalityQuery &Query) {
         return Query.Types[0].isScalar() &&
                Query.Types[0] != Query.MMODescrs[0].MemoryTy;
       })
-/*      .narrowScalarIf(
-            [=](const LegalityQuery &Query) -> bool {
-              const LLT DstTy = Query.Types[0];
-              const LLT PtrTy = Query.Types[1];
+      .legalIf([=](const LegalityQuery &Query) {
+        TypeSize Size = Query.Types[0].getSizeInBits();
+        return Size == 16 || Size == 32;
+      })
+      /*      .narrowScalarIf(
+                  [=](const LegalityQuery &Query) -> bool {
+                    const LLT DstTy = Query.Types[0];
+                    const LLT PtrTy = Query.Types[1];
 
-              const unsigned DstSize = DstTy.getSizeInBits();
-              unsigned MemSize = Query.MMODescrs[0].MemoryTy.getSizeInBits();
+                    const unsigned DstSize = DstTy.getSizeInBits();
+                    unsigned MemSize =
+         Query.MMODescrs[0].MemoryTy.getSizeInBits();
 
-              // Split extloads.
-              return DstSize > MemSize;
-            },
-            [=](const LegalityQuery &Query) -> std::pair<unsigned, LLT> {
-              return std::pair(0, LLT::scalar(Query.MMODescrs[0].MemoryTy.getSizeInBits()));
-            })*/;
-  
+                    // Split extloads.
+                    return DstSize > MemSize;
+                  },
+                  [=](const LegalityQuery &Query) -> std::pair<unsigned, LLT> {
+                    return std::pair(0,
+         LLT::scalar(Query.MMODescrs[0].MemoryTy.getSizeInBits()));
+                  })*/
+      ;
+
   // Pointer-handling.
   getActionDefinitionsBuilder(TargetOpcode::G_FRAME_INDEX).legalFor({p0});
   getActionDefinitionsBuilder(TargetOpcode::G_PTR_ADD)
@@ -71,7 +77,8 @@ H2BLBLegalizerInfo::H2BLBLegalizerInfo(const H2BLBSubtarget &ST) : ST(ST) {
   // Arithmetic.
   getActionDefinitionsBuilder({TargetOpcode::G_ADD, TargetOpcode::G_AND})
       .legalFor({s16})
-      .clampScalar(0, s16, s32);
+      .clampScalar(0, s16, s32)
+      .scalarize(0);
 
   getActionDefinitionsBuilder(TargetOpcode::G_MUL)
       .customIf([=](const LegalityQuery &Query) {
@@ -79,6 +86,22 @@ H2BLBLegalizerInfo::H2BLBLegalizerInfo(const H2BLBSubtarget &ST) : ST(ST) {
         return !DstTy.isVector() && DstTy.getSizeInBits() == 32;
       });
 
+  // Merge/Unmerge
+  for (unsigned Op :
+       {TargetOpcode::G_MERGE_VALUES, TargetOpcode::G_UNMERGE_VALUES,
+        TargetOpcode::G_BUILD_VECTOR}) {
+    unsigned BigTyIdx = Op == TargetOpcode::G_UNMERGE_VALUES ? 1 : 0;
+    unsigned LitTyIdx = Op == TargetOpcode::G_UNMERGE_VALUES ? 0 : 1;
+    getActionDefinitionsBuilder(Op).legalIf([=](const LegalityQuery &Q) {
+      return Q.Types[BigTyIdx].getSizeInBits() == 32 &&
+             Q.Types[LitTyIdx].getSizeInBits() == 16;
+    });
+  }
+  getActionDefinitionsBuilder(TargetOpcode::G_EXTRACT_VECTOR_ELT)
+      .legalIf([=](const LegalityQuery &Q) {
+        return Q.Types[0].getSizeInBits() == 16 &&
+               Q.Types[1].getSizeInBits() == 32;
+      });
   getLegacyLegalizerInfo().computeTables();
 }
 

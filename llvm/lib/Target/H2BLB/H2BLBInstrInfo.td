@@ -97,6 +97,7 @@ def CALL : H2BLBInstruction<"call", "$tgt",
   let Inst{10-0} = tgt;
   let Pattern = [(H2BLBcall tglobaladdr:$tgt)];
 }
+def : Pat<(H2BLBcall texternalsym:$tgt), (CALL i16imm:$tgt)>;
 
 let hasSideEffects = 1, isCodeGenOnly = 1 in {
 let Defs = [SP], Uses = [SP] in {

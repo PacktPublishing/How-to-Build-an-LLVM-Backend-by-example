@@ -289,8 +289,10 @@ SDValue H2BLBTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   if (GlobalAddressSDNode *G = dyn_cast<GlobalAddressSDNode>(Callee))
     Callee = DAG.getTargetGlobalAddress(G->getGlobal(), DL, PtrVT,
                                         G->getOffset(), 0);
+  else if (ExternalSymbolSDNode *E = dyn_cast<ExternalSymbolSDNode>(Callee))
+    Callee = DAG.getTargetExternalSymbol(E->getSymbol(), PtrVT, 0);
   else
-    report_fatal_error("non-direct calls not implemented");
+    report_fatal_error("other calls not implemented");
 
   SmallVector<SDValue, 8> Ops;
   Ops.push_back(Chain);

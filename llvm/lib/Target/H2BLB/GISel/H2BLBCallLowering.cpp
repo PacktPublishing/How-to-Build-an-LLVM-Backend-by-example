@@ -375,7 +375,7 @@ bool H2BLBCallLowering::lowerCall(MachineIRBuilder &MIRBuilder,
   CallSeqStart = MIRBuilder.buildInstr(H2BLB::ADJCALLSTACKDOWN);
 
   // We don't support indirect calls.
-  if (!Info.Callee.isGlobal())
+  if (!Info.Callee.isGlobal() && !Info.Callee.isSymbol())
     return false;
   auto MIB = MIRBuilder.buildInstrNoInsert(H2BLB::CALL);
   MIB->addOperand(MF, Info.Callee);

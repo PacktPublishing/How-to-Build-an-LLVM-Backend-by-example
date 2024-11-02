@@ -53,7 +53,7 @@ def RETURN : H2BLBNoOperandInstruction<"ret",
 // Pseudo return instruction to make the machine verifier happy during
 // GlobalISel lowering. Indeed, the live-range of R0 will only be correct
 // after we run FinalizeISel.
-let isReturn = 1, isTerminator = 1, isBarrier = 1 in
+let isReturn = 1, isTerminator = 1, isBarrier = 1, usesCustomInserter = 1 in
 def RET_PSEUDO : H2BLBPseudoInstruction<(outs), (ins), []>;
 
 def LD16imm7 : H2BLBLoadImmediate<"ldi16",

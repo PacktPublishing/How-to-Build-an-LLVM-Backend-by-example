@@ -359,9 +359,101 @@ H2BLBTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
   switch (MI.getOpcode()) {
   default:
     llvm_unreachable("Custom inserter not yet implemented");
+  case H2BLB::LD16imm16:
+    return emitLD16imm16(MI);
   case H2BLB::RET_PSEUDO:
     return emitRET_PSEUDO(MI);
   }
+}
+
+MachineBasicBlock *H2BLBTargetLowering::emitLD16imm16(MachineInstr &MI) const {
+  assert(MI.getOpcode() == H2BLB::LD16imm16);
+  MachineBasicBlock &MBB = *MI.getParent();
+  MachineFunction &MF = *MBB.getParent();
+  const TargetInstrInfo &TII = *Subtarget.getInstrInfo();
+  MachineRegisterInfo &MRI = MF.getRegInfo();
+
+  // When using FastISel we may end up with this pseudo whereas the
+  // immediate may fit the encoding already.
+  // Try re-selecting the instruction.
+  int64_t RawImmVal = MI.getOperand(1).getImm();
+  assert(RawImmVal <= std::numeric_limits<int16_t>::max() &&
+         RawImmVal >= std::numeric_limits<int16_t>::min() &&
+         "immediate value out of range");
+  uint16_t ImmVal = RawImmVal & 0xFFFF;
+  // We build the whole constant backward to reuse the 7 constant.
+  // v2 = LDimm 7-bit chunk2
+  // acc = v2
+  // acc <<= 7
+  // v1 = LDimm 7-bit chunk1
+  // acc |= v1
+  // acc <<= 7
+  // v0 = LDimm 7-bit chunk0
+  // acc |= v0
+  Register Accumulator;
+  Register FinalReg = MI.getOperand(0).getReg();
+  bool PreviousChunksAreZero = true;
+  constexpr unsigned ChunkSize = 7;
+  constexpr unsigned ChunkMask = (1 << ChunkSize) - 1;
+  const MCInstrDesc &LdImmDesc = TII.get(H2BLB::LD16imm7);
+  MachineInstr *LastMI;
+  Register ChunkSizeReg;
+  auto MaterializeChunkSizeReg = [&]() {
+    if (ChunkSizeReg == H2BLB::NoRegister) {
+      ChunkSizeReg = MRI.createVirtualRegister(&H2BLB::GPR16RegClass);
+      BuildMI(MBB, MI, MI.getDebugLoc(), LdImmDesc, ChunkSizeReg)
+          .addImm(ChunkSize);
+    }
+  };
+
+  for (int ChunkNb = 16 / ChunkSize; ChunkNb != -1; --ChunkNb) {
+    unsigned ChunkShift = ChunkNb * ChunkSize;
+    uint16_t CurChunk = ImmVal & (ChunkMask << ChunkShift);
+    CurChunk >>= ChunkShift;
+    if (!PreviousChunksAreZero) {
+      Register NewAcc = MRI.createVirtualRegister(&H2BLB::GPR16RegClass);
+      assert(Accumulator != H2BLB::NoRegister &&
+             "We should have seen a non-zero chunk");
+      MaterializeChunkSizeReg();
+      LastMI =
+          BuildMI(MBB, MI, MI.getDebugLoc(), TII.get(H2BLB::SHL16rr), NewAcc)
+              .addReg(Accumulator)
+              .addReg(ChunkSizeReg);
+      Accumulator = NewAcc;
+    }
+    Register CurChunkReg = MRI.createVirtualRegister(&H2BLB::GPR16RegClass);
+    if (ChunkNb == 0) {
+      MI.setDesc(LdImmDesc);
+      MI.getOperand(0).setReg(CurChunkReg);
+      MI.getOperand(1).setImm(CurChunk);
+      LastMI = &MI;
+    } else if (CurChunk) {
+      LastMI = BuildMI(MBB, MI, MI.getDebugLoc(), LdImmDesc, CurChunkReg)
+                   .addImm(CurChunk);
+    }
+    if (CurChunk) {
+      if (PreviousChunksAreZero)
+        Accumulator = LastMI->getOperand(0).getReg();
+      else {
+        assert(Accumulator != H2BLB::NoRegister &&
+               "We should have seen a non-zero chunk");
+        Register NewAcc = MRI.createVirtualRegister(&H2BLB::GPR16RegClass);
+        // We tweak the insertion point here because we use MI as the LDImm for
+        // the last chunk, thus if we have to insert something, we have to
+        // insert it after MI, not before.
+        LastMI = BuildMI(MBB,
+                         (ChunkNb == 0) ? std::next(MI.getIterator())
+                                        : MI.getIterator(),
+                         MI.getDebugLoc(), TII.get(H2BLB::OR16rr), NewAcc)
+                     .addReg(Accumulator)
+                     .addReg(CurChunkReg);
+        Accumulator = NewAcc;
+      }
+      PreviousChunksAreZero = false;
+    }
+  }
+  LastMI->getOperand(0).setReg(FinalReg);
+  return &MBB;
 }
 
 MachineBasicBlock *H2BLBTargetLowering::emitRET_PSEUDO(MachineInstr &MI) const {

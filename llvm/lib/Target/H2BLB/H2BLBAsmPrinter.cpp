@@ -71,8 +71,13 @@ bool H2BLBAsmPrinter::lowerOperand(const MachineOperand &MO, MCOperand &MCO) {
     MCO = MCOperand::createExpr(Expr);
     break;
   }
+  case MachineOperand::MO_ExternalSymbol: {
+    MCSymbol *Sym = GetExternalSymbolSymbol(MO.getSymbolName());
+    const MCExpr *Expr = MCSymbolRefExpr::create(Sym, OutContext);
+    MCO = MCOperand::createExpr(Expr);
+    break;
+  }
   case MachineOperand::MO_MachineBasicBlock:
-  case MachineOperand::MO_ExternalSymbol:
   case MachineOperand::MO_MCSymbol:
   case MachineOperand::MO_JumpTableIndex:
   case MachineOperand::MO_ConstantPoolIndex:

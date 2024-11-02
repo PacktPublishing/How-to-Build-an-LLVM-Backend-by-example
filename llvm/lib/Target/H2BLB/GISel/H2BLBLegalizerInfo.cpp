@@ -51,6 +51,8 @@ H2BLBLegalizerInfo::H2BLBLegalizerInfo(const H2BLBSubtarget &ST) : ST(ST) {
         TypeSize Size = Query.Types[0].getSizeInBits();
         return Size == 16 || Size == 32;
       })
+      .scalarize(0)
+      .lower()
       /*      .narrowScalarIf(
                   [=](const LegalityQuery &Query) -> bool {
                     const LLT DstTy = Query.Types[0];
@@ -85,6 +87,9 @@ H2BLBLegalizerInfo::H2BLBLegalizerInfo(const H2BLBSubtarget &ST) : ST(ST) {
         const auto &DstTy = Query.Types[0];
         return !DstTy.isVector() && DstTy.getSizeInBits() == 32;
       });
+
+  // Floating-point arithmetic.
+  getActionDefinitionsBuilder(TargetOpcode::G_FADD).scalarize(0).libcall();
 
   // Merge/Unmerge
   for (unsigned Op :

@@ -34,6 +34,8 @@ H2BLBTargetLowering::H2BLBTargetLowering(const TargetMachine &TM,
 
   setOperationAction(ISD::ADD, MVT::v2i16, Expand);
 
+  setOperationAction(ISD::FADD, MVT::f32, LibCall);
+
   // Tell the generic implementation that we are done with setting up our
   // register classes.
   computeRegisterProperties(Subtarget.getRegisterInfo());

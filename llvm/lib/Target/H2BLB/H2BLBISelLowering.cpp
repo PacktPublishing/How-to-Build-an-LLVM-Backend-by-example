@@ -94,7 +94,8 @@ H2BLBTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
   for (size_t i = 0, e = RetValLocs.size(); i != e; ++i) {
     CCValAssign &VA = RetValLocs[i];
     assert(VA.isRegLoc() && "stack return not yet implemented");
-    assert(VA.getLocInfo() == CCValAssign::Full &&
+    assert((VA.getLocInfo() == CCValAssign::Full ||
+            VA.getLocInfo() == CCValAssign::BCvt) &&
            "extension/truncation of any sort, not yet implemented");
 
     Chain = DAG.getCopyToReg(Chain, DL, VA.getLocReg(), OutVals[i], Glue);
@@ -140,7 +141,8 @@ SDValue H2BLBTargetLowering::LowerFormalArguments(
     SDValue ArgValue;
 
     if (VA.isRegLoc()) {
-      if (VA.getLocInfo() != CCValAssign::Full)
+      if (VA.getLocInfo() != CCValAssign::Full &&
+          VA.getLocInfo() != CCValAssign::BCvt)
         report_fatal_error("partial type, not yet implemented");
 
       // Arguments passed in registers
@@ -184,6 +186,8 @@ SDValue H2BLBTargetLowering::LowerFormalArguments(
       ArgValue = DAG.getExtLoad(ExtType, DL, VA.getLocVT(), Chain, FrameIdxNode,
                                 PtrInfo, MemVT);
     }
+    if (VA.getLocInfo() == CCValAssign::BCvt)
+      ArgValue = DAG.getBitcast(VA.getValVT(), ArgValue);
     InVals.push_back(ArgValue);
   }
 

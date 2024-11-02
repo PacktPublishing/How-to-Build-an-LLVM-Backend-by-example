@@ -86,32 +86,29 @@ define i32 @oneArgi32(i32 %arg) {
 define <2 x i16> @oneArgv2i16(<2 x i16> %arg) {
   ; CHECK-LABEL: name: oneArgv2i16
   ; CHECK: bb.0 (%ir-block.0):
-  ; CHECK-NEXT:   liveins: $r1, $r0
+  ; CHECK-NEXT:   liveins: $d1, $r0
   ; CHECK-NEXT: {{  $}}
   ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
-  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r1
-  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr16 = COPY [[COPY1]]
-  ; CHECK-NEXT:   [[LDRSP32_:%[0-9]+]]:gpr32 = LDRSP32 %fixed-stack.0, 0 :: (load (s32) from %fixed-stack.0, align 8)
-  ; CHECK-NEXT:   STR32 killed [[LDRSP32_]], [[COPY2]], 0 :: (store (s32))
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr32 = COPY $d1
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr32 = COPY [[COPY1]]
+  ; CHECK-NEXT:   $d1 = COPY [[COPY2]]
   ; CHECK-NEXT:   $r0 = COPY [[COPY]]
-  ; CHECK-NEXT:   RETURN implicit $r0
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $d1
   ret <2 x i16> %arg
 }
 
 define <2 x i16> @twoArgsi16(i16 %arg, i16 %arg1) {
   ; CHECK-LABEL: name: twoArgsi16
   ; CHECK: bb.0 (%ir-block.0):
-  ; CHECK-NEXT:   liveins: $r1, $r2, $r3, $r0
+  ; CHECK-NEXT:   liveins: $r1, $r2, $r0
   ; CHECK-NEXT: {{  $}}
   ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
-  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r3
-  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr16 = COPY $r2
-  ; CHECK-NEXT:   [[COPY3:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r2
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr16 = COPY $r1
   ; CHECK-NEXT:   [[REG_SEQUENCE:%[0-9]+]]:gpr32 = REG_SEQUENCE [[COPY2]], %subreg.sub_low16, [[COPY1]], %subreg.sub_high16
-  ; CHECK-NEXT:   [[COPY4:%[0-9]+]]:gpr16 = COPY [[COPY3]]
-  ; CHECK-NEXT:   STR32 killed [[REG_SEQUENCE]], [[COPY4]], 0 :: (store (s32))
+  ; CHECK-NEXT:   $d1 = COPY [[REG_SEQUENCE]]
   ; CHECK-NEXT:   $r0 = COPY [[COPY]]
-  ; CHECK-NEXT:   RETURN implicit $r0
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $d1
   %partial = insertelement <2 x i16> poison, i16 %arg, i32 0
   %res = insertelement <2 x i16> %partial, i16 %arg1, i32 1
   ret <2 x i16> %res

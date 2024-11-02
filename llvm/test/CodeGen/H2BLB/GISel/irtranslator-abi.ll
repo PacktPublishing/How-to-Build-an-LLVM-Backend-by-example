@@ -68,31 +68,29 @@ define i32 @oneArgi32(i32 %arg) {
 define <2 x i16> @oneArgv2i16(<2 x i16> %arg) {
   ; CHECK-LABEL: name: oneArgv2i16
   ; CHECK: bb.1 (%ir-block.0):
-  ; CHECK-NEXT:   liveins: $r1
+  ; CHECK-NEXT:   liveins: $d1
   ; CHECK-NEXT: {{  $}}
-  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:_(p0) = COPY $r1
-  ; CHECK-NEXT:   [[FRAME_INDEX:%[0-9]+]]:_(p0) = G_FRAME_INDEX %fixed-stack.0
-  ; CHECK-NEXT:   [[LOAD:%[0-9]+]]:_(<2 x s16>) = G_LOAD [[FRAME_INDEX]](p0) :: (invariant load (<2 x s16>) from %fixed-stack.0, align 8)
-  ; CHECK-NEXT:   G_STORE [[LOAD]](<2 x s16>), [[COPY]](p0) :: (store (<2 x s16>))
-  ; CHECK-NEXT:   RET_PSEUDO
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:_(s32) = COPY $d1
+  ; CHECK-NEXT:   [[BITCAST:%[0-9]+]]:_(<2 x s16>) = G_BITCAST [[COPY]](s32)
+  ; CHECK-NEXT:   $d1 = COPY [[BITCAST]](<2 x s16>)
+  ; CHECK-NEXT:   RET_PSEUDO implicit $d1
   ret <2 x i16> %arg
 }
 
 define <2 x i16> @twoArgsi16(i16 %arg, i16 %arg1) {
   ; CHECK-LABEL: name: twoArgsi16
   ; CHECK: bb.1 (%ir-block.0):
-  ; CHECK-NEXT:   liveins: $r1, $r2, $r3
+  ; CHECK-NEXT:   liveins: $r1, $r2
   ; CHECK-NEXT: {{  $}}
-  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:_(p0) = COPY $r1
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:_(s16) = COPY $r1
   ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:_(s16) = COPY $r2
-  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:_(s16) = COPY $r3
   ; CHECK-NEXT:   [[DEF:%[0-9]+]]:_(<2 x s16>) = G_IMPLICIT_DEF
   ; CHECK-NEXT:   [[C:%[0-9]+]]:_(s16) = G_CONSTANT i16 0
   ; CHECK-NEXT:   [[C1:%[0-9]+]]:_(s16) = G_CONSTANT i16 1
-  ; CHECK-NEXT:   [[IVEC:%[0-9]+]]:_(<2 x s16>) = G_INSERT_VECTOR_ELT [[DEF]], [[COPY1]](s16), [[C]](s16)
-  ; CHECK-NEXT:   [[IVEC1:%[0-9]+]]:_(<2 x s16>) = G_INSERT_VECTOR_ELT [[IVEC]], [[COPY2]](s16), [[C1]](s16)
-  ; CHECK-NEXT:   G_STORE [[IVEC1]](<2 x s16>), [[COPY]](p0) :: (store (<2 x s16>))
-  ; CHECK-NEXT:   RET_PSEUDO
+  ; CHECK-NEXT:   [[IVEC:%[0-9]+]]:_(<2 x s16>) = G_INSERT_VECTOR_ELT [[DEF]], [[COPY]](s16), [[C]](s16)
+  ; CHECK-NEXT:   [[IVEC1:%[0-9]+]]:_(<2 x s16>) = G_INSERT_VECTOR_ELT [[IVEC]], [[COPY1]](s16), [[C1]](s16)
+  ; CHECK-NEXT:   $d1 = COPY [[IVEC1]](<2 x s16>)
+  ; CHECK-NEXT:   RET_PSEUDO implicit $d1
   %partial = insertelement <2 x i16> poison, i16 %arg, i32 0
   %res = insertelement <2 x i16> %partial, i16 %arg1, i32 1
   ret <2 x i16> %res

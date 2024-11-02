@@ -29,6 +29,7 @@ H2BLBLegalizerInfo::H2BLBLegalizerInfo(const H2BLBSubtarget &ST) : ST(ST) {
   const LLT s8 = LLT::scalar(8);
   const LLT s16 = LLT::scalar(16);
   const LLT s32 = LLT::scalar(32);
+  const LLT v2s16 = LLT::fixed_vector(2, 16);
 
   // Constants
   getActionDefinitionsBuilder({TargetOpcode::G_CONSTANT, TargetOpcode::G_IMPLICIT_DEF})
@@ -90,6 +91,10 @@ H2BLBLegalizerInfo::H2BLBLegalizerInfo(const H2BLBSubtarget &ST) : ST(ST) {
 
   // Floating-point arithmetic.
   getActionDefinitionsBuilder(TargetOpcode::G_FADD).scalarize(0).libcall();
+
+  // Copy.
+  getActionDefinitionsBuilder(TargetOpcode::G_BITCAST)
+      .legalForCartesianProduct({v2s16, s32});
 
   // Merge/Unmerge
   for (unsigned Op :

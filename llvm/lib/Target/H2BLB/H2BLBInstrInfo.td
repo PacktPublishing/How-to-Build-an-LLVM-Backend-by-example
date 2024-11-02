@@ -244,3 +244,10 @@ def : Pat<(vector_extract (v2i16 GPR32:$rs), (i16 1)),
 // Build a 32-bit register from 2 16-bit registers.
 def : Pat<(v2i16 (build_vector GPR16:$a, GPR16:$b)),
           (v2i16 (REG_SEQUENCE GPR32, $a, sub_low16, $b, sub_high16))>;
+
+// Select bitcasts.
+// We use COPY_TO_REGCLASS here instead of plain COPY to help the GISel
+// importer. Otherwise, the importer cannot figure out the register class
+// of the destination of the COPY.
+def : Pat<(i32 (bitconvert (v2i16 GPR32:$src))), (COPY_TO_REGCLASS GPR32:$src, GPR32)>;
+def : Pat<(v2i16 (bitconvert (i32 GPR32:$src))), (COPY_TO_REGCLASS GPR32:$src, GPR32)>;

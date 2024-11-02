@@ -215,7 +215,9 @@ struct OutgoingArgHandler : public CallLowering::OutgoingValueHandler {
     // Attach the phys reg on the instruction itself (call or return
     // instruction).
     MIB.addUse(PhysReg, RegState::Implicit);
-    assert(VA.getLocInfo() == CCValAssign::Full && "Extension not supported");
+    assert((VA.getLocInfo() == CCValAssign::Full ||
+            VA.getLocInfo() == CCValAssign::BCvt) &&
+           "Extension not supported");
     // Assign the value to the phys reg.
     MIRBuilder.buildCopy(PhysReg, ValVReg);
   }

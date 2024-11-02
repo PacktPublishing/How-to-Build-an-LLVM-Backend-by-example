@@ -242,9 +242,11 @@ struct OutgoingArgHandler : public CallLowering::OutgoingValueHandler {
 bool H2BLBCallLowering::lowerReturn(MachineIRBuilder &MIRBuilder,
                                     const Value *Val, ArrayRef<Register> VRegs,
                                     FunctionLoweringInfo &FLI) const {
-  // The implicit use of LR is already part of the instruction description,
-  // hence we do not have to add it.
-  auto MIB = MIRBuilder.buildInstrNoInsert(H2BLB::RETURN);
+  // Use our pseudo return instruction because LR is not going to
+  // have a proper live-range until we run finalize-isel.
+  // In other words, if we use the real RETURN instruction, we will
+  // end up with machine verify errors.
+  auto MIB = MIRBuilder.buildInstrNoInsert(H2BLB::RET_PSEUDO);
   assert(((Val && !VRegs.empty()) || (!Val && VRegs.empty())) &&
          "Return value without a vreg");
 

@@ -63,6 +63,7 @@ def LD32imm7 : H2BLBLoadImmediate<"ldi32",
                                  /*opcode=*/0b00010,
                                  /*is32Bit=*/1>;
 
+let usesCustomInserter = true in
 def LD16imm16 : H2BLBPseudoInstruction<(outs GPR16:$dst), (ins i16imm:$src),
                                        [(set GPR16:$dst, imm:$src)]>;
 

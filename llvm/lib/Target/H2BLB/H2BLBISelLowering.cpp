@@ -353,6 +353,27 @@ SDValue H2BLBTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   return Chain;
 }
 
+MachineBasicBlock *
+H2BLBTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
+                                                 MachineBasicBlock *BB) const {
+  switch (MI.getOpcode()) {
+  default:
+    llvm_unreachable("Custom inserter not yet implemented");
+  case H2BLB::RET_PSEUDO:
+    return emitRET_PSEUDO(MI);
+  }
+}
+
+MachineBasicBlock *H2BLBTargetLowering::emitRET_PSEUDO(MachineInstr &MI) const {
+  assert(MI.getOpcode() == H2BLB::RET_PSEUDO);
+  MachineBasicBlock &MBB = *MI.getParent();
+  const TargetInstrInfo &TII = *Subtarget.getInstrInfo();
+  MI.setDesc(TII.get(H2BLB::RETURN));
+  MI.addOperand(MachineOperand::CreateReg(H2BLB::R0, /*IsDef=*/false,
+                                          /*IsImplicit=*/true));
+  return &MBB;
+}
+
 void H2BLBTargetLowering::finalizeLowering(MachineFunction &MF) const {
   // GISel already call this method so don't call it twice.
 if (MF.getProperties().hasProperty(
@@ -374,8 +395,10 @@ if (MF.getProperties().hasProperty(
       continue;
     assert(MaybeExitMBB.getFirstTerminator() != MaybeExitMBB.end() &&
            "Exit block must have a terminator");
-    assert(MaybeExitMBB.getFirstTerminator()->getOpcode() == H2BLB::RETURN &&
-           "Exit block must end with return");
+    assert(
+        (MaybeExitMBB.getFirstTerminator()->getOpcode() == H2BLB::RETURN ||
+         MaybeExitMBB.getFirstTerminator()->getOpcode() == H2BLB::RET_PSEUDO) &&
+        "Exit block must end with return");
     BuildMI(MaybeExitMBB, MaybeExitMBB.getFirstTerminator(), DebugLoc(),
             TII.get(TargetOpcode::COPY), LR)
         .addReg(SavedLR);

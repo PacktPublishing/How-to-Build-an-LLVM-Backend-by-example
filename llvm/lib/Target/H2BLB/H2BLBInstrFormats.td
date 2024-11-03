@@ -33,6 +33,16 @@ def uimm4 : Operand<i16>, ImmLeaf<i16, [{return Imm >= 0 && Imm < 16;}]> {
   let ParserMatchClass = AsmImmRange<0, 15>;
 }
 
+
+// XForm.
+
+def to_tframeindex : SDNodeXForm<frameindex, [{
+  return CurDAG->getTargetFrameIndex(N->getIndex(), N->getValueType(0));
+}]>;
+
+
+// Complex patterns.
+
 def addrmode : ComplexPattern<iPTR, 2, "selectAddrMode", []>;
 def spaddrmode : ComplexPattern<iPTR, 2, "selectSPAddrMode", []>;
 

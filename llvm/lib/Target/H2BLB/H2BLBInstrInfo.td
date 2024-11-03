@@ -134,6 +134,7 @@ def MOVFROMSP: H2BLBInstruction<"movfromsp", "$dst, $sp",
   let Inst{6-4} = sp;
   let Inst{3-0} = 0;
 }
+def : Pat<(i16 (frameindex:$ptr)), (MOVFROMSP (i16 (to_tframeindex $ptr)))>;
 
 let AddedComplexity = 1 in {
 def STRSP16: H2BLBStoreSPInstruction<"strsp16", /*is32Bit=*/0> {

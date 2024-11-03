@@ -41,3 +41,41 @@ define i32 @alloca32(i32 %val) {
   %res = load volatile i32, ptr %ptr
   ret i32 %res
 }
+
+define i16 @alloca32SExtLoad(i32 %val) {
+  ; CHECK-LABEL: name: alloca32SExtLoad
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $d1, $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr32 = COPY $d1
+  ; CHECK-NEXT:   STRSP32 [[COPY1]], %stack.0.ptr, 0 :: (store (s32) into %ir.ptr)
+  ; CHECK-NEXT:   [[LDRSEXTSP8_:%[0-9]+]]:gpr16 = LDRSEXTSP8 %stack.0.ptr, 0 :: (volatile dereferenceable load (s8) from %ir.ptr, align 4)
+  ; CHECK-NEXT:   $r1 = COPY [[LDRSEXTSP8_]]
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  %ptr = alloca i32
+  store i32 %val, ptr %ptr
+  %ld = load volatile i8, ptr %ptr
+  %res = sext i8 %ld to i16
+  ret i16 %res
+}
+
+define i16 @alloca32ZExtLoad(i32 %val) {
+  ; CHECK-LABEL: name: alloca32ZExtLoad
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $d1, $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr32 = COPY $d1
+  ; CHECK-NEXT:   STRSP32 [[COPY1]], %stack.0.ptr, 0 :: (store (s32) into %ir.ptr)
+  ; CHECK-NEXT:   [[LDRZEXTSP8_:%[0-9]+]]:gpr16 = LDRZEXTSP8 %stack.0.ptr, 0 :: (volatile dereferenceable load (s8) from %ir.ptr, align 4)
+  ; CHECK-NEXT:   $r1 = COPY [[LDRZEXTSP8_]]
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  %ptr = alloca i32
+  store i32 %val, ptr %ptr
+  %ld = load volatile i8, ptr %ptr
+  %res = zext i8 %ld to i16
+  ret i16 %res
+}

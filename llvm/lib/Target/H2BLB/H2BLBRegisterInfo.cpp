@@ -16,6 +16,7 @@
 #include "llvm/ADT/BitVector.h"
 #include "llvm/CodeGen/MachineFrameInfo.h"
 #include "llvm/CodeGen/MachineFunction.h"
+#include "llvm/CodeGen/TargetInstrInfo.h"
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
 
 #define GET_REGINFO_TARGET_DESC
@@ -53,6 +54,7 @@ bool H2BLBRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   MachineBasicBlock &MBB = *MI.getParent();
   MachineFunction &MF = *MBB.getParent();
   const MachineFrameInfo &MFI = MF.getFrameInfo();
+  const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
 
   DebugLoc DL = MI.getDebugLoc();
 
@@ -71,15 +73,49 @@ bool H2BLBRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   assert(FIOperandNum == 1 && "Stack argument is expected to be the second "
                               "operand for both loads and stores");
   switch (MI.getOpcode()) {
+  case H2BLB::LDRSEXTSP8:
+  case H2BLB::LDRZEXTSP8:
   case H2BLB::STRSP16:
   case H2BLB::LDRSP16:
   case H2BLB::STRSP32:
   case H2BLB::LDRSP32:
     FIOp.ChangeToRegister(H2BLB::SP, /*IsDef=*/false);
     Offset += MI.getOperand(2).getImm();
+    // If the offset doesn't fit, we need to expand into:
+    // off = ldimm offset
+    // base = movefromsp sp
+    // addr = addi16rr base, off
+    // loadOrStoreNoSP16 addr, 0
+    //
+    // SUBSP
+    // movfromsp
+    // loadOrStore
+    // ADDSP
     assert(Offset >= -64 && Offset < 63 && "Offset must fit 7 bits for now");
     MI.getOperand(2).setImm(Offset);
     break;
+  case H2BLB::MOVFROMSP: {
+    FIOp.ChangeToRegister(H2BLB::SP, /*IsDef=*/false);
+
+    // If the offset is zero, the MOVFROMSP is enough.
+    if (Offset == 0)
+      break;
+    // Adapt the offset by change SP on the fly and back.
+    // ADDSP
+    // movfromsp
+    // SUBSP
+    // Note that there are other possible sequences to lower this offset, but
+    // this one doesn't require to use the register scavenger.
+    assert(Offset >= 0 && Offset <= 1023 && "offset out-of-range");
+    BuildMI(MBB, MI, DebugLoc(), TII.get(H2BLB::ADDSP), H2BLB::SP)
+        .addReg(H2BLB::SP, RegState::Kill)
+        .addImm(Offset);
+    BuildMI(MBB, std::next(MI.getIterator()), DebugLoc(), TII.get(H2BLB::SUBSP),
+            H2BLB::SP)
+        .addReg(H2BLB::SP, RegState::Kill)
+        .addImm(Offset);
+    break;
+  }
   default:
     llvm_unreachable("frame index used on unknown instruction");
   }

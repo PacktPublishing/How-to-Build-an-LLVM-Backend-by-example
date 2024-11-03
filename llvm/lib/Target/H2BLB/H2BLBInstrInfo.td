@@ -49,6 +49,11 @@ def ADDi32rr : H2BLBBinaryInstruction<"addi32",
                                       /*opcode=*/0,
                                       /*is32Bit=*/true>;
 
+let FastISelShouldIgnore = 1, usesCustomInserter = 1 in
+def PTR_ADD16rr :
+  H2BLBPseudoInstruction<(outs GPR16:$dst), (ins GPR16:$src0, GPR16:$src1),
+                         [(set GPR16:$dst, (ptradd GPR16:$src0, GPR16:$src1))]>;
+
 let Uses = [R0], isReturn = 1, isTerminator = 1, isBarrier = 1,
 Pattern = [(H2BLBreturnglue)] in
 def RETURN : H2BLBNoOperandInstruction<"ret",

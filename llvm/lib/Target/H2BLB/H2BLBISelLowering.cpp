@@ -39,6 +39,8 @@ H2BLBTargetLowering::H2BLBTargetLowering(const TargetMachine &TM,
 
   setOperationAction(ISD::FADD, MVT::f32, LibCall);
 
+  setOperationAction(ISD::MUL, MVT::i32, Custom);
+
   // Tell the generic implementation that we are done with setting up our
   // register classes.
   computeRegisterProperties(Subtarget.getRegisterInfo());
@@ -356,6 +358,52 @@ SDValue H2BLBTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   return Chain;
 }
 
+SDValue H2BLBTargetLowering::lowerMUL(SDValue Op, SelectionDAG &DAG) const {
+  assert(Op.getOpcode() == ISD::MUL);
+
+  const EVT ValTy = Op.getValueType();
+  assert(ValTy == MVT::i32 &&
+         "Custom legalization description doesn't match implementation");
+
+  // Check if the MUL is fed by two s|zext and if so let is go through.
+  SDValue LHS = Op.getOperand(0);
+  SDValue RHS = Op.getOperand(1);
+  bool isSigned;
+  if (LHS->getOpcode() == ISD::SIGN_EXTEND &&
+      RHS->getOpcode() == ISD::SIGN_EXTEND)
+    isSigned = true;
+  else if (LHS->getOpcode() == ISD::ZERO_EXTEND &&
+           RHS->getOpcode() == ISD::ZERO_EXTEND)
+    isSigned = false;
+  else
+    return SDValue();
+
+  SDValue PlainLHS = LHS.getOperand(0);
+  SDValue PlainRHS = RHS.getOperand(0);
+  if (PlainLHS.getValueType() != MVT::i16 ||
+      PlainRHS.getValueType() != MVT::i16)
+    return SDValue();
+
+  unsigned Opcode =
+      isSigned ? H2BLBISD::WIDENING_SMUL : H2BLBISD::WIDENING_UMUL;
+  SDValue NewVal = DAG.getNode(Opcode, SDLoc(Op), ValTy, PlainLHS, PlainRHS);
+  return NewVal;
+}
+
+SDValue H2BLBTargetLowering::LowerOperation(SDValue Op,
+                                            SelectionDAG &DAG) const {
+  LLVM_DEBUG(dbgs() << "Custom lowering: ");
+  LLVM_DEBUG(Op.dump());
+
+  switch (Op.getOpcode()) {
+  default:
+    llvm_unreachable("unimplemented operand");
+    return SDValue();
+  case ISD::MUL:
+    return lowerMUL(Op, DAG);
+  }
+}
+
 MachineBasicBlock *
 H2BLBTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
                                                  MachineBasicBlock *BB) const {
@@ -531,6 +579,10 @@ const char *H2BLBTargetLowering::getTargetNodeName(unsigned Opcode) const {
     return "H2BLBISD::RETURN_GLUE";
   case H2BLBISD::CALL:
     return "H2BLBISD::CALL";
+  case H2BLBISD::WIDENING_SMUL:
+    return "H2BLBISD::WIDENING_SMUL";
+  case H2BLBISD::WIDENING_UMUL:
+    return "H2BLBISD::WIDENING_UMUL";
   }
   return nullptr;
 }

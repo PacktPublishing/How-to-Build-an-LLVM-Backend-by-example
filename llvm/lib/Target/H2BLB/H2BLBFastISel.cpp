@@ -14,6 +14,7 @@
 
 #include "H2BLB.h" // For the declaration of H2BLB::createFastISel.
 #include "H2BLBCallingConvention.h"
+#include "H2BLBISelLowering.h" // For H2BLBISD.
 #include "H2BLBInstrInfo.h"
 #include "H2BLBRegisterInfo.h" // For the register classes.
 #include "llvm/CodeGen/FastISel.h"

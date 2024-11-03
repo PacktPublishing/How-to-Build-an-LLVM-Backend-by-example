@@ -177,6 +177,17 @@ class H2BLBLoadSPInstruction<string asm,
   let Inst{6-0} = offset;
 }
 
+class H2BLBExtLoadSPInstruction<string asm,
+                              bit isZExt = 0>
+          : H2BLBInstruction<asm, "$dst, $sp, $offset", /*opcode=*/0b01011, isZExt,
+                             (outs GPR16:$dst), (ins OnlySP:$sp, simm7:$offset)> {
+  let mayLoad = 1;
+  bits<3> dst;
+  bits<7> offset;
+  let Inst{9-7} = dst;
+  let Inst{6-0} = offset;
+}
+
 class H2BLBBinarySPInstruction<string asm,
                                bits<5> opcode,
                                bit isAdd>

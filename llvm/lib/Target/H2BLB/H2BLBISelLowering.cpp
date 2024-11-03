@@ -29,6 +29,7 @@ namespace {
 enum class H2BLBLowerMULMode {
   Selection,
   CustomLegalization,
+  DAGCombine,
 };
 } // end anonymous namespace.
 
@@ -39,7 +40,9 @@ static cl::opt<H2BLBLowerMULMode> LowerMULMode(
                           "Let mul pass through legalization and selection it "
                           "with a DAG pattern"),
                clEnumValN(H2BLBLowerMULMode::CustomLegalization, "1",
-                          "Lower mul through a custom legalization rule")),
+                          "Lower mul through a custom legalization rule"),
+               clEnumValN(H2BLBLowerMULMode::DAGCombine, "2",
+                          "Lower mul through a DAG combine")),
     cl::init(H2BLBLowerMULMode::Selection));
 
 H2BLBTargetLowering::H2BLBTargetLowering(const TargetMachine &TM,
@@ -58,13 +61,19 @@ H2BLBTargetLowering::H2BLBTargetLowering(const TargetMachine &TM,
 
   setOperationAction(ISD::FADD, MVT::f32, LibCall);
 
-  if (LowerMULMode == H2BLBLowerMULMode::CustomLegalization) {
+  switch (LowerMULMode) {
+  case H2BLBLowerMULMode::CustomLegalization:
     setOperationAction(ISD::MUL, MVT::i32, Custom);
-  } else {
+    break;
+  case H2BLBLowerMULMode::DAGCombine:
+    setTargetDAGCombine(ISD::MUL);
+    [[fallthrough]];
+  case H2BLBLowerMULMode::Selection:
     // Technically our MUL are not legal since we only support
     // the widening pattern.
     // For the sake of the example, this is good enough though.
     setOperationAction(ISD::MUL, MVT::i32, Legal);
+    break;
   }
 
   // Tell the generic implementation that we are done with setting up our
@@ -428,6 +437,20 @@ SDValue H2BLBTargetLowering::LowerOperation(SDValue Op,
   case ISD::MUL:
     return lowerMUL(Op, DAG);
   }
+}
+
+SDValue H2BLBTargetLowering::PerformDAGCombine(SDNode *N,
+                                               DAGCombinerInfo &DCI) const {
+  switch (N->getOpcode()) {
+  default:
+    LLVM_DEBUG(dbgs() << "Custom combining: skipping\n");
+    break;
+  case ISD::MUL:
+    if (LowerMULMode == H2BLBLowerMULMode::DAGCombine)
+      return lowerMUL(SDValue(N, 0), DCI.DAG);
+    break;
+  }
+  return SDValue();
 }
 
 MachineBasicBlock *

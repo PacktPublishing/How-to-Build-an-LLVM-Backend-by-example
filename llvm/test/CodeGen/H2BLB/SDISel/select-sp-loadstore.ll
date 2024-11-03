@@ -30,3 +30,98 @@ define i32 @alloca32(i32 %val) {
   %res = load volatile i32, ptr %ptr
   ret i32 %res
 }
+
+define i16 @alloca32SExtLoad(i32 %val) {
+; CHECK-LABEL: alloca32SExtLoad:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    subsp sp, sp, 4
+; CHECK-NEXT:    strsp32 d1, sp, 0
+; CHECK-NEXT:    ldrsextsp8 r1, sp, 0
+; CHECK-NEXT:    addsp sp, sp, 4
+; CHECK-NEXT:    ret
+  %ptr = alloca i32
+  store i32 %val, ptr %ptr
+  %ld = load volatile i8, ptr %ptr
+  %res = sext i8 %ld to i16
+  ret i16 %res
+}
+
+define i16 @alloca32ZExtLoad(i32 %val) {
+; CHECK-LABEL: alloca32ZExtLoad:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    subsp sp, sp, 4
+; CHECK-NEXT:    strsp32 d1, sp, 0
+; CHECK-NEXT:    ldrzextsp8 r1, sp, 0
+; CHECK-NEXT:    addsp sp, sp, 4
+; CHECK-NEXT:    ret
+  %ptr = alloca i32
+  store i32 %val, ptr %ptr
+  %ld = load volatile i8, ptr %ptr
+  %res = zext i8 %ld to i16
+  ret i16 %res
+}
+
+declare void @other(ptr)
+
+; Make sure that we support sp + offset.
+define i16 @sploadPlusImm() {
+; CHECK-LABEL: sploadPlusImm:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    subsp sp, sp, 8
+; CHECK-NEXT:    strsp32 d2, sp, 4 # 4-byte Folded Spill
+; CHECK-NEXT:    mov16 r4, r0
+; CHECK-NEXT:    movfromsp r1, sp
+; CHECK-NEXT:    call other
+; CHECK-NEXT:    ldrsp16 r1, sp, 1
+; CHECK-NEXT:    mov16 r0, r4
+; CHECK-NEXT:    ldrsp32 d2, sp, 4 # 4-byte Folded Reload
+; CHECK-NEXT:    addsp sp, sp, 8
+; CHECK-NEXT:    ret
+  %value = alloca i32
+  call void @other(ptr %value)
+  %addrPlus1 = getelementptr i8, ptr %value, i16 1
+  %res = load i16, ptr %addrPlus1
+  ret i16 %res
+}
+
+; Put two allocas to check that we support frame-indices that lower
+; to SP+offset.
+; The structure of the stack in this case is:
+; high-addr:
+;  |  12-16: spill
+;  |  8-12: stack object for %value
+;  |  4-8: stack object for %value2
+;  v  0-4: padding (we need to be 8-byte align)
+; low-addr
+define i16 @twoAllocasploadPlusImm() {
+; CHECK-LABEL: twoAllocasploadPlusImm:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    subsp sp, sp, 16
+; CHECK-NEXT:    strsp32 d2, sp, 12 # 4-byte Folded Spill
+; CHECK-NEXT:    mov16 r4, r0
+; CHECK-NEXT:    addsp sp, sp, 8
+; CHECK-NEXT:    movfromsp r1, sp
+; CHECK-NEXT:    subsp sp, sp, 8
+; CHECK-NEXT:    call other
+; CHECK-NEXT:    addsp sp, sp, 4
+; CHECK-NEXT:    movfromsp r1, sp
+; CHECK-NEXT:    subsp sp, sp, 4
+; CHECK-NEXT:    call other
+; CHECK-NEXT:    ldrsp16 r0, sp, 5
+; CHECK-NEXT:    ldrsp16 r1, sp, 9
+; CHECK-NEXT:    addi16 r1, r1, r0
+; CHECK-NEXT:    mov16 r0, r4
+; CHECK-NEXT:    ldrsp32 d2, sp, 12 # 4-byte Folded Reload
+; CHECK-NEXT:    addsp sp, sp, 16
+; CHECK-NEXT:    ret
+  %value = alloca i32
+  %value2 = alloca i32
+  call void @other(ptr %value)
+  call void @other(ptr %value2)
+  %addrPlus1 = getelementptr i8, ptr %value, i16 1
+  %res0 = load i16, ptr %addrPlus1
+  %addr2Plus1 = getelementptr i8, ptr %value2, i16 1
+  %res1 = load i16, ptr %addr2Plus1
+  %res = add i16 %res0, %res1
+  ret i16 %res
+}

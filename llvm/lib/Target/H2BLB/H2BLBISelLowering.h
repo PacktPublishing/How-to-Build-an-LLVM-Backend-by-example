@@ -23,6 +23,8 @@ enum NodeType : unsigned {
   FIRST_NUMBER = ISD::BUILTIN_OP_END,
   CALL,
   RETURN_GLUE,
+  WIDENING_SMUL,
+  WIDENING_UMUL,
 };
 }
 
@@ -37,6 +39,9 @@ class H2BLBTargetLowering : public TargetLowering {
 
   /// Custom inserter for the RET_PSEUDO instruction.
   MachineBasicBlock *emitRET_PSEUDO(MachineInstr &MI) const;
+
+  /// Custom legalization of MUL.
+  SDValue lowerMUL(SDValue Op, SelectionDAG &DAG) const;
 
 public:
   explicit H2BLBTargetLowering(const TargetMachine &TM,
@@ -93,6 +98,9 @@ public:
   /// grab callee resulting values..
   SDValue LowerCall(CallLoweringInfo &CLI,
                     SmallVectorImpl<SDValue> &InVals) const override;
+
+  /// Hook for custom legalization.
+  SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
 
   MachineBasicBlock *
   EmitInstrWithCustomInserter(MachineInstr &MI,

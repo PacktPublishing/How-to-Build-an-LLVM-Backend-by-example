@@ -247,10 +247,9 @@ bool H2BLBCallLowering::lowerReturn(MachineIRBuilder &MIRBuilder,
          "Return value without a vreg");
 
   bool Success = true;
-  if (!FLI.CanLowerReturn)
-    report_fatal_error("sret demoting not implemented yet");
-
-  if (!VRegs.empty()) {
+  if (!FLI.CanLowerReturn) {
+    insertSRetStores(MIRBuilder, Val->getType(), VRegs, FLI.DemoteRegister);
+  } else if (!VRegs.empty()) {
     MachineFunction &MF = MIRBuilder.getMF();
     const Function &F = MF.getFunction();
 
@@ -403,14 +402,17 @@ bool H2BLBCallLowering::lowerCall(MachineIRBuilder &MIRBuilder,
       .addImm(Assigner.StackSize)
       .addImm(0);
 
-  if (!Info.CanLowerReturn)
-    return false;
-
   // Finally we can copy the returned value back into its virtual-register. In
   // symmetry with the arguments, the physical register must be an
   // implicit-define of the call instruction.
   if (Info.OrigRet.Ty->isVoidTy())
     return true;
+
+  if (!Info.CanLowerReturn) {
+    insertSRetLoads(MIRBuilder, Info.OrigRet.Ty, Info.OrigRet.Regs,
+                    Info.DemoteRegister, Info.DemoteStackIndex);
+    return true;
+  }
 
   CallReturnHandler CallRetHandler(MIRBuilder, MRI, MIB);
   if (!OutArgs.empty() && OutArgs[0].Flags[0].isReturned())

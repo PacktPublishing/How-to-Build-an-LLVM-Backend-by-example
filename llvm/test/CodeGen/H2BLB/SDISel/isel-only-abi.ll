@@ -292,3 +292,89 @@ define i16 @lotsOfArgs1(i16 %a1, i16 %a2, i16 %a3, i16 %a4, i16 %a5, i16 %a6, i1
   %res = add i16 %tmp2, %tmp0
   ret i16 %res
 }
+
+; Lowering of structures.
+
+%struct.nested = type { i16, { i16, i16 }, i16}
+
+define i16 @structInputArg(%struct.nested %struct) {
+  ; CHECK-LABEL: name: structInputArg
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r3, $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r3
+  ; CHECK-NEXT:   $r1 = COPY [[COPY1]]
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  %res = extractvalue %struct.nested %struct, 1, 1
+  ret i16 %res
+}
+
+define i16 @structOutArg() {
+  ; CHECK-LABEL: name: structOutArg
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   [[LDRSP16_:%[0-9]+]]:gpr16 = LDRSP16 %stack.0.addr_input, 4 :: (dereferenceable load (s16) from %ir.addr_input + 4, align 4)
+  ; CHECK-NEXT:   [[LDRSP16_1:%[0-9]+]]:gpr16 = LDRSP16 %stack.0.addr_input, 2 :: (dereferenceable load (s16) from %ir.addr_input + 2)
+  ; CHECK-NEXT:   [[LDRSP16_2:%[0-9]+]]:gpr16 = LDRSP16 %stack.0.addr_input, 0 :: (dereferenceable load (s16) from %ir.addr_input, align 8)
+  ; CHECK-NEXT:   [[LDRSP16_3:%[0-9]+]]:gpr16 = LDRSP16 %stack.0.addr_input, 6 :: (dereferenceable load (s16) from %ir.addr_input + 6)
+  ; CHECK-NEXT:   ADJCALLSTACKDOWN 2, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   STRSP16 killed [[LDRSP16_3]], $sp, 0 :: (store (s16) into stack)
+  ; CHECK-NEXT:   $r1 = COPY [[LDRSP16_2]]
+  ; CHECK-NEXT:   $r2 = COPY [[LDRSP16_1]]
+  ; CHECK-NEXT:   $r3 = COPY [[LDRSP16_]]
+  ; CHECK-NEXT:   CALL @structInputArg, csr, implicit-def dead $r0, implicit $sp, implicit $r1, implicit $r2, implicit $r3, implicit-def $sp, implicit-def $r1
+  ; CHECK-NEXT:   ADJCALLSTACKUP 2, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   $r1 = COPY [[COPY1]]
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  %addr_input = alloca %struct.nested
+  %input = load %struct.nested, ptr %addr_input
+  %res = call i16 @structInputArg(%struct.nested %input)
+  ret i16 %res
+}
+
+define %struct.nested @structReturn() {
+  ; CHECK-LABEL: name: structReturn
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r1, $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r1
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr16 = COPY [[COPY1]]
+  ; CHECK-NEXT:   [[LD32imm32_:%[0-9]+]]:gpr32 = LD32imm32 196610
+  ; CHECK-NEXT:   STR32 killed [[LD32imm32_]], [[COPY2]], 4 :: (store (s32))
+  ; CHECK-NEXT:   [[LD32imm32_1:%[0-9]+]]:gpr32 = LD32imm32 65536
+  ; CHECK-NEXT:   STR32 killed [[LD32imm32_1]], [[COPY2]], 0 :: (store (s32), align 8)
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0
+  %struct1 = insertvalue %struct.nested undef, i16 0, 0
+  %struct2 = insertvalue %struct.nested %struct1, i16 1, 1, 0
+  %struct3 = insertvalue %struct.nested %struct2, i16 2, 1, 1
+  %struct4 = insertvalue %struct.nested %struct3, i16 3, 2
+  ret %struct.nested %struct4
+}
+
+define i16 @readStructReturn() {
+  ; CHECK-LABEL: name: readStructReturn
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   ADJCALLSTACKDOWN 0, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   [[MOVFROMSP:%[0-9]+]]:gpr16 = MOVFROMSP %stack.0
+  ; CHECK-NEXT:   $r1 = COPY [[MOVFROMSP]]
+  ; CHECK-NEXT:   CALL @structReturn, csr, implicit-def dead $r0, implicit $sp, implicit $r1, implicit-def $sp
+  ; CHECK-NEXT:   ADJCALLSTACKUP 0, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   [[LDRSP16_:%[0-9]+]]:gpr16 = LDRSP16 %stack.0, 6 :: (load (s16) from %stack.0 + 6, basealign 8)
+  ; CHECK-NEXT:   $r1 = COPY [[LDRSP16_]]
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  %struct = call %struct.nested @structReturn()
+  %res = extractvalue %struct.nested %struct, 2
+  ret i16 %res
+}

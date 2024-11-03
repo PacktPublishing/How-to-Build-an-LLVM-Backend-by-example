@@ -38,6 +38,10 @@ def H2BLBcall : SDNode<"H2BLBISD::CALL",
                        [SDNPHasChain, SDNPOptInGlue, SDNPOutGlue,
                         SDNPVariadic]>;
 
+def SDTypeWideningProfile : SDTypeProfile<1, 2, [SDTCisVT<0,i32>, SDTCisVT<1,i16>, SDTCisSameAs<1,2>]>;
+def H2BLBwidening_smul : SDNode<"H2BLBISD::WIDENING_SMUL", SDTypeWideningProfile, [SDNPCommutative]>;
+def H2BLBwidening_umul : SDNode<"H2BLBISD::WIDENING_UMUL", SDTypeWideningProfile, [SDNPCommutative]>;
+
 
 let Pattern = [(set GPR16:$dst, (add GPR16:$src0, GPR16:$src1))] in
 def ADDi16rr : H2BLBBinaryInstruction<"addi16",
@@ -207,6 +211,8 @@ def WIDENING_UMUL : H2BLBWidenIMul<"wumul", /*isSign=*/0>;
 
 def : Pat<(i32 (mul (sext GPR16:$src0), (sext GPR16:$src1))), (WIDENING_SMUL GPR16:$src0, GPR16:$src1)>;
 def : Pat<(i32 (mul (zext GPR16:$src0), (zext GPR16:$src1))), (WIDENING_UMUL GPR16:$src0, GPR16:$src1)>;
+def : Pat<(i32 (H2BLBwidening_smul (i16 GPR16:$src0), (i16 GPR16:$src1))), (WIDENING_SMUL GPR16:$src0, GPR16:$src1)>;
+def : Pat<(i32 (H2BLBwidening_umul (i16 GPR16:$src0), (i16 GPR16:$src1))), (WIDENING_UMUL GPR16:$src0, GPR16:$src1)>;
 
 let Pattern = [(set GPR16:$dst, (and GPR16:$src0, GPR16:$src1))] in
 def AND16 : H2BLBBinaryInstruction<"and16",

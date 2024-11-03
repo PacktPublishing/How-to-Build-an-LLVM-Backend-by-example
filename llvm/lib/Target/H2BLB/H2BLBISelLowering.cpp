@@ -338,12 +338,17 @@ SDValue H2BLBTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
 MachineBasicBlock *
 H2BLBTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
                                                  MachineBasicBlock *BB) const {
+  const TargetInstrInfo &TII = *Subtarget.getInstrInfo();
   switch (MI.getOpcode()) {
   default:
     llvm_unreachable("Custom inserter not yet implemented");
   case H2BLB::RET_PSEUDO:
     return emitRET_PSEUDO(MI);
+  case H2BLB::PTR_ADD16rr:
+    MI.setDesc(TII.get(H2BLB::ADDi16rr));
+    break;
   }
+  return BB;
 }
 
 MachineBasicBlock *H2BLBTargetLowering::emitRET_PSEUDO(MachineInstr &MI) const {

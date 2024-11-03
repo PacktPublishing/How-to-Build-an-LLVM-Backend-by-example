@@ -91,39 +91,65 @@ bool H2BLBDAGToDAGISel::selectSPAddrMode(SDValue N, SDValue &Base,
   SDLoc dl(N);
   const DataLayout &DL = CurDAG->getDataLayout();
   const TargetLowering *TLI = getTargetLowering();
-  if (N.getOpcode() == ISD::FrameIndex) {
-    int FI = cast<FrameIndexSDNode>(N)->getIndex();
-    Base = CurDAG->getTargetFrameIndex(FI, TLI->getPointerTy(DL));
-    OffImm = CurDAG->getTargetConstant(0, dl, MVT::i16);
-    return true;
-  }
 
-  auto MaybeSPNode = [](SDValue N) -> SDValue {
+  auto MaybeSPNode = [](SDValue N) -> bool {
     if (N.getOpcode() == ISD::CopyFromReg) {
       Register Reg = cast<RegisterSDNode>(N.getOperand(1))->getReg();
-      if (Reg == H2BLB::SP)
-        return N.getOperand(1);
+      return Reg == H2BLB::SP;
+    }
+    return false;
+  };
+
+  auto MaybeFrameIndex = [&](SDValue N) -> SDValue {
+    if (N.getOpcode() == ISD::FrameIndex) {
+      int FI = cast<FrameIndexSDNode>(N)->getIndex();
+      return CurDAG->getTargetFrameIndex(FI, TLI->getPointerTy(DL));
     }
     return SDValue();
   };
 
-  if ((Base = MaybeSPNode(N)) != SDValue()) {
-    OffImm = CurDAG->getTargetConstant(0, dl, MVT::i16);
-    return true;
+  auto MatchSPRegOrIndex = [&](SDValue N, SDValue &MaybeIndex) -> bool {
+    MaybeIndex = MaybeFrameIndex(N);
+    if (MaybeIndex != SDValue())
+      return true;
+    return MaybeSPNode(N);
+  };
+
+  // On a match, if MaybeIndex is not a SDValue we are dealing with a
+  // FrameIndex, otherwise we are dealing with SP.
+  SDValue MaybeIndex;
+  bool Matched = false;
+  int64_t CstImm = 0;
+
+  switch (N->getOpcode()) {
+  case ISD::CopyFromReg:
+  case ISD::FrameIndex:
+    Matched = MatchSPRegOrIndex(N, MaybeIndex);
+    break;
+  case ISD::OR:
+  case ISD::ADD: {
+    // Do some matching of ADD + immediate and fold if it fits.
+    if (!isa<ConstantSDNode>(N->getOperand(1)))
+      return false;
+    CstImm = N->getConstantOperandVal(1);
+    if (CstImm < -64 || CstImm >= 64)
+      return false;
+
+    Matched = MatchSPRegOrIndex(N->getOperand(0), MaybeIndex);
+    break;
+  }
+  default:
+    Matched = false;
+    break;
   }
 
-  // Do some matching of ADD + immediate and fold if it fits.
-  if (N->getOpcode() != ISD::ADD)
-    return false;
-  Base = MaybeSPNode(N->getOperand(0));
-  if (Base == SDValue())
-    return false;
-  if (!isa<ConstantSDNode>(N->getOperand(1)))
-    return false;
-  int64_t CstImm = N->getConstantOperandVal(1);
-  if (CstImm < -64 || CstImm >= 64)
+  if (!Matched)
     return false;
 
+  if (MaybeIndex)
+    Base = MaybeIndex;
+  else
+    Base = CurDAG->getRegister(H2BLB::SP, MVT::i16);
   OffImm = CurDAG->getTargetConstant(CstImm, dl, MVT::i16);
   return true;
 }

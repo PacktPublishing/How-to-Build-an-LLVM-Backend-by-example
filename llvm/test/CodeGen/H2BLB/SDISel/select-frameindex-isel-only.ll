@@ -23,3 +23,37 @@ define void @frameIndex() {
   call void @other(ptr %value)
   ret void
 }
+
+define i16 @twoAllocasploadPlusImm() {
+  ; CHECK-LABEL: name: twoAllocasploadPlusImm
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   ADJCALLSTACKDOWN 0, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   [[MOVFROMSP:%[0-9]+]]:gpr16 = MOVFROMSP %stack.0.value
+  ; CHECK-NEXT:   $r1 = COPY [[MOVFROMSP]]
+  ; CHECK-NEXT:   CALL @other, csr, implicit-def dead $r0, implicit $sp, implicit $r1, implicit-def $sp
+  ; CHECK-NEXT:   ADJCALLSTACKUP 0, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   ADJCALLSTACKDOWN 0, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   [[MOVFROMSP1:%[0-9]+]]:gpr16 = MOVFROMSP %stack.1.value2
+  ; CHECK-NEXT:   $r1 = COPY [[MOVFROMSP1]]
+  ; CHECK-NEXT:   CALL @other, csr, implicit-def dead $r0, implicit $sp, implicit $r1, implicit-def $sp
+  ; CHECK-NEXT:   ADJCALLSTACKUP 0, 0, implicit-def dead $sp, implicit $sp
+  ; CHECK-NEXT:   [[LDRSP16_:%[0-9]+]]:gpr16 = LDRSP16 %stack.1.value2, 1 :: (load (s16) from %ir.addr2Plus1)
+  ; CHECK-NEXT:   [[LDRSP16_1:%[0-9]+]]:gpr16 = LDRSP16 %stack.0.value, 1 :: (load (s16) from %ir.addrPlus1)
+  ; CHECK-NEXT:   [[ADDi16rr:%[0-9]+]]:gpr16 = ADDi16rr killed [[LDRSP16_1]], killed [[LDRSP16_]]
+  ; CHECK-NEXT:   $r1 = COPY [[ADDi16rr]]
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
+  %value = alloca i32
+  %value2 = alloca i32
+  call void @other(ptr %value)
+  call void @other(ptr %value2)
+  %addrPlus1 = getelementptr i8, ptr %value, i16 1
+  %res0 = load i16, ptr %addrPlus1
+  %addr2Plus1 = getelementptr i8, ptr %value2, i16 1
+  %res1 = load i16, ptr %addr2Plus1
+  %res = add i16 %res0, %res1
+  ret i16 %res
+}

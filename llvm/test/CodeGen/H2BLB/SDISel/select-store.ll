@@ -63,3 +63,24 @@ define void @storei32PlusImm(i32 %val, ptr %arg) {
   store i32 %val, ptr %addr
   ret void
 }
+
+define void @truncstorei8(i16 %val, ptr %arg) {
+; CHECK-LABEL: truncstorei8:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    truncstr8 r1, r2, 0
+; CHECK-NEXT:    ret
+  %trunc = trunc i16 %val to i8
+  store i8 %trunc, ptr %arg
+  ret void
+}
+
+define void @truncstorei8PlusImm(i16 %val, ptr %arg) {
+; CHECK-LABEL: truncstorei8PlusImm:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    truncstr8 r1, r2, 7
+; CHECK-NEXT:    ret
+  %trunc = trunc i16 %val to i8
+  %addr = getelementptr i8, ptr %arg, i16 7
+  store i8 %trunc, ptr %addr
+  ret void
+}

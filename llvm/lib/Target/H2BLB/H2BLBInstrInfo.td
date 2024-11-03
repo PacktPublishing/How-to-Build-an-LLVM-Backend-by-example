@@ -107,6 +107,22 @@ def STR32 : H2BLBStoreInstruction<"str32",
   let Pattern = [(store (i32 GPR32:$src), (addrmode GPR16:$addr, uimm4:$offset))];
 }
 
+def TRUNCSTR8: H2BLBInstruction<"truncstr8", "$src, $addr, $offset",
+                                 /*opcode=*/0b01110,
+                                 /*unusedBit=*/0,
+                                 /*oops=*/(outs),
+                                 /*iops=*/(ins GPR16:$src, GPR16:$addr, uimm4:$offset)> {
+  let mayStore = 1;
+  bits<3> src;
+  bits<3> addr;
+  bits<4> offset;
+  let Inst{9-7} = src;
+  let Inst{6-4} = addr;
+  let Inst{3-0} = offset;
+  let Pattern = [(truncstorei8 (i16 GPR16:$src), (addrmode GPR16:$addr, uimm4:$offset))];
+}
+def : Pat<(store (i8 (trunc GPR16:$src)), (addrmode GPR16:$addr, uimm4:$offset)), (TRUNCSTR8 GPR16:$src, GPR16:$addr, uimm4:$offset)>;
+
 def MOV16 : H2BLBMoveInstruction<"mov16", /*is32Bit=*/0>;
 def MOV32 : H2BLBMoveInstruction<"mov32", /*is32Bit=*/1>;
 

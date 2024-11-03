@@ -21,3 +21,21 @@ ldi16 r1, r1
 // CHECK: error: immediate must be an integer in range [0, 127].
 // CHECK: ldi16 r1, 128
 ldi16 r1, 128
+
+// Same thing for the 32-bit variant
+
+// CHECK: error: invalid operand for instruction
+// CHECK: ldi32 r0
+ldi32 r0, 12
+
+// CHECK: error: too few operands for instruction
+// CHECK: ldi32 #d1
+ldi32 #d1, d1, d3
+
+// CHECK: error: immediate must be an integer in range [0, 127].
+// CHECK: ldi32 d1, r1
+ldi32 d1, r1
+
+// CHECK: error: immediate must be an integer in range [0, 127].
+// CHECK: ldi32 d1, 128
+ldi32 d1, 128

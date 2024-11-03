@@ -66,18 +66,12 @@ def RETURN : H2BLBNoOperandInstruction<"ret",
 let isReturn = 1, isTerminator = 1, isBarrier = 1, usesCustomInserter = 1 in
 def RET_PSEUDO : H2BLBPseudoInstruction<(outs), (ins), []>;
 
-let isAsCheapAsAMove = 1, isMoveImm = 1, isReMaterializable = 1 in
-def LD16imm7 : H2BLBInstruction<"ldi16", "$dst, $imm7",
+def LD16imm7 : H2BLBLoadImmediate<"ldi16",
                                  /*opcode=*/0b00010,
-                                 /*is32Bit=*/0,
-                                 /*oops=*/(outs GPR16:$dst),
-                                 /*iops=*/(ins uimm7:$imm7)> {
-  bits<3> dst;
-  bits<7> imm7;
-  let Inst{9-7} = dst;
-  let Inst{6-0} = imm7;
-  let Pattern = [(set GPR16:$dst, uimm7:$imm7)];
-}
+                                 /*is32Bit=*/0>;
+def LD32imm7 : H2BLBLoadImmediate<"ldi32",
+                                 /*opcode=*/0b00010,
+                                 /*is32Bit=*/1>;
 
 def LD16imm16 : H2BLBPseudoInstruction<(outs GPR16:$dst), (ins i16imm:$src),
                                        [(set GPR16:$dst, imm:$src)]>;

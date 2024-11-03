@@ -18,10 +18,29 @@
 #include "H2BLBTargetMachine.h"
 
 #include "llvm/CodeGen/MachineFrameInfo.h"
+#include "llvm/Support/CommandLine.h"
 
 using namespace llvm;
 
 #define DEBUG_TYPE "h2blb-lowering"
+
+namespace {
+// Modes to play with different ways of lowering a ISD::MUL.
+enum class H2BLBLowerMULMode {
+  Selection,
+  CustomLegalization,
+};
+} // end anonymous namespace.
+
+static cl::opt<H2BLBLowerMULMode> LowerMULMode(
+    "h2blb-lower-mul-mode", cl::Hidden,
+    cl::desc("Use different strategy to lower mul"),
+    cl::values(clEnumValN(H2BLBLowerMULMode::Selection, "0",
+                          "Let mul pass through legalization and selection it "
+                          "with a DAG pattern"),
+               clEnumValN(H2BLBLowerMULMode::CustomLegalization, "1",
+                          "Lower mul through a custom legalization rule"),
+    cl::init(H2BLBLowerMULMode::Selection));
 
 H2BLBTargetLowering::H2BLBTargetLowering(const TargetMachine &TM,
                                          const H2BLBSubtarget &STI)
@@ -36,7 +55,14 @@ H2BLBTargetLowering::H2BLBTargetLowering(const TargetMachine &TM,
 
   setOperationAction(ISD::FADD, MVT::f32, LibCall);
 
-  setOperationAction(ISD::MUL, MVT::i32, Custom);
+  if (LowerMULMode == H2BLBLowerMULMode::CustomLegalization) {
+    setOperationAction(ISD::MUL, MVT::i32, Custom);
+  } else {
+    // Technically our MUL are not legal since we only support
+    // the widening pattern.
+    // For the sake of the example, this is good enough though.
+    setOperationAction(ISD::MUL, MVT::i32, Legal);
+  }
 
   // Tell the generic implementation that we are done with setting up our
   // register classes.

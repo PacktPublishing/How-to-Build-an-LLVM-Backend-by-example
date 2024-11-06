@@ -43,6 +43,11 @@ let Pattern = [(set GPR16:$dst, (add GPR16:$src0, GPR16:$src1))] in
 def ADDi16rr : H2BLBBinaryInstruction<"addi16",
                                       /*opcode=*/0,
                                       /*is32Bit=*/false>;
+let Pattern = [(set (i32 GPR32:$dst), (add (i32 GPR32:$src0),
+                                           (i32 GPR32:$src1)))] in
+def ADDi32rr : H2BLBBinaryInstruction<"addi32",
+                                      /*opcode=*/0,
+                                      /*is32Bit=*/true>;
 
 let Uses = [R0], isReturn = 1, isTerminator = 1, isBarrier = 1,
 Pattern = [(H2BLBreturnglue)] in

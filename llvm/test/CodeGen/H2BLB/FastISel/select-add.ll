@@ -38,3 +38,21 @@ define i16 @addi16Imm(i16 %a) {
   %res = add i16 %a, 6
   ret i16 %res
 }
+
+; Similar to addi16Imm but for 32-bit values.
+define i32 @addi32Imm(i32 %a) {
+  ; CHECK-LABEL: name: addi32Imm
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $d1, $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr32 = COPY $d1
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr32 = COPY killed [[COPY1]]
+  ; CHECK-NEXT:   [[LD32imm32_:%[0-9]+]]:gpr32 = LD32imm32 6
+  ; CHECK-NEXT:   [[ADDi32rr:%[0-9]+]]:gpr32 = ADDi32rr [[COPY2]], [[LD32imm32_]]
+  ; CHECK-NEXT:   $d1 = COPY [[ADDi32rr]]
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $d1
+  %res = add i32 %a, 6
+  ret i32 %res
+}

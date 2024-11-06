@@ -259,6 +259,15 @@ def : Pat<(i32 (shl (i32 GPR32:$src0), (i32 GPR32:$src1))),
           (SHL32rr (i32 GPR32:$src0),
                    (i16 (EXTRACT_SUBREG GPR32:$src1, sub_low16)))>;
 
+let Pattern = [(set GPR16:$dst, (or GPR16:$src0, GPR16:$src1))] in
+def OR16rr : H2BLBBinaryInstruction<"or16",
+                                     /*opcode=*/0b10000,
+                                     /*is32Bit=*/false>;
+let Pattern = [(set (i32 GPR32:$dst), (or GPR32:$src0, GPR32:$src1))] in
+def OR32rr : H2BLBBinaryInstruction<"or32",
+                                     /*opcode=*/0b10000,
+                                     /*is32Bit=*/true>;
+
 // Patterns to deal with breaking up a GPR32 into GPR16 chunks.
 def : GINodeEquiv<G_EXTRACT_VECTOR_ELT, vector_extract>;
 def : Pat<(vector_extract (v2i16 GPR32:$rs), (i16 0)),

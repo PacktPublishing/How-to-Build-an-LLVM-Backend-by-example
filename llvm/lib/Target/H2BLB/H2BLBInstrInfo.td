@@ -239,6 +239,26 @@ def AND32rr : H2BLBBinaryInstruction<"and32",
                                      /*opcode=*/0b01100,
                                      /*is32Bit=*/true>;
 
+let Pattern = [(set (i16 GPR16:$dst), (shl GPR16:$src0, GPR16:$src1))] in
+def SHL16rr : H2BLBBinaryInstruction<"shl16",
+                                     /*opcode=*/0b01111,
+                                     /*is32Bit=*/false>;
+// The 32-bit pattern is a bit convoluted because SDISel insists on using
+// a smaller type since the full 32-bit range is useless.
+let Pattern = [(set (i32 GPR32:$dst), (shl (i32 GPR32:$src0),
+                                           (i16 GPR16:$src1)))] in
+// We override the InOperandList to be able to use a different register class
+// on both input operands.
+let InOperandList = (ins GPR32:$src0, GPR16:$src1) in
+def SHL32rr : H2BLBBinaryInstruction<"shl32",
+                                     /*opcode=*/0b01111,
+                                     /*is32Bit=*/true>;
+// Match the `shl 32, 32` form as well, i.e., when the shift amount is not
+// narrowed on a smaller type.
+def : Pat<(i32 (shl (i32 GPR32:$src0), (i32 GPR32:$src1))),
+          (SHL32rr (i32 GPR32:$src0),
+                   (i16 (EXTRACT_SUBREG GPR32:$src1, sub_low16)))>;
+
 // Patterns to deal with breaking up a GPR32 into GPR16 chunks.
 def : GINodeEquiv<G_EXTRACT_VECTOR_ELT, vector_extract>;
 def : Pat<(vector_extract (v2i16 GPR32:$rs), (i16 0)),

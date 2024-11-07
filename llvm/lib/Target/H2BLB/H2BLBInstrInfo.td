@@ -208,3 +208,12 @@ def : Pat<(i32 (mul (sext GPR16:$src0), (sext GPR16:$src1))),
           (WIDENING_SMUL GPR16:$src0, GPR16:$src1)>;
 def : Pat<(i32 (mul (zext GPR16:$src0), (zext GPR16:$src1))),
           (WIDENING_UMUL GPR16:$src0, GPR16:$src1)>;
+
+let Pattern = [(set GPR16:$dst, (and GPR16:$src0, GPR16:$src1))] in
+def AND16rr : H2BLBBinaryInstruction<"and16",
+                                     /*opcode=*/0b01100,
+                                     /*is32Bit=*/false>;
+let Pattern = [(set GPR32:$dst, (and GPR32:$src0, GPR32:$src1))] in
+def AND32rr : H2BLBBinaryInstruction<"and32",
+                                     /*opcode=*/0b01100,
+                                     /*is32Bit=*/true>;

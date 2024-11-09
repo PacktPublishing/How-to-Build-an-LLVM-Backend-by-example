@@ -37,8 +37,12 @@ define i16 @retCst() {
   ; CHECK-NEXT:   liveins: $r0
   ; CHECK-NEXT: {{  $}}
   ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
-  ; CHECK-NEXT:   [[LD16imm16_:%[0-9]+]]:gpr16 = LD16imm16 132
-  ; CHECK-NEXT:   $r1 = COPY [[LD16imm16_]]
+  ; CHECK-NEXT:   [[LD16imm7_:%[0-9]+]]:gpr16 = LD16imm7 1
+  ; CHECK-NEXT:   [[LD16imm7_1:%[0-9]+]]:gpr16 = LD16imm7 7
+  ; CHECK-NEXT:   [[SHL16rr:%[0-9]+]]:gpr16 = SHL16rr [[LD16imm7_]], [[LD16imm7_1]]
+  ; CHECK-NEXT:   [[LD16imm7_2:%[0-9]+]]:gpr16 = LD16imm7 4
+  ; CHECK-NEXT:   [[OR16rr:%[0-9]+]]:gpr16 = OR16rr [[SHL16rr]], [[LD16imm7_2]]
+  ; CHECK-NEXT:   $r1 = COPY [[OR16rr]]
   ; CHECK-NEXT:   $r0 = COPY [[COPY]]
   ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
   ret i16 132
@@ -345,10 +349,19 @@ define %struct.nested @structReturn() {
   ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
   ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r1
   ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr16 = COPY [[COPY1]]
-  ; CHECK-NEXT:   [[LD32imm32_:%[0-9]+]]:gpr32 = LD32imm32 196610
-  ; CHECK-NEXT:   STR32 killed [[LD32imm32_]], [[COPY2]], 4 :: (store (s32))
-  ; CHECK-NEXT:   [[LD32imm32_1:%[0-9]+]]:gpr32 = LD32imm32 65536
-  ; CHECK-NEXT:   STR32 killed [[LD32imm32_1]], [[COPY2]], 0 :: (store (s32), align 8)
+  ; CHECK-NEXT:   [[LD32imm7_:%[0-9]+]]:gpr32 = LD32imm7 12
+  ; CHECK-NEXT:   [[LD16imm7_:%[0-9]+]]:gpr16 = LD16imm7 7
+  ; CHECK-NEXT:   [[SHL32rr:%[0-9]+]]:gpr32 = SHL32rr [[LD32imm7_]], [[LD16imm7_]]
+  ; CHECK-NEXT:   [[SHL32rr1:%[0-9]+]]:gpr32 = SHL32rr [[SHL32rr]], [[LD16imm7_]]
+  ; CHECK-NEXT:   [[LD32imm7_1:%[0-9]+]]:gpr32 = LD32imm7 2
+  ; CHECK-NEXT:   [[OR32rr:%[0-9]+]]:gpr32 = OR32rr [[SHL32rr1]], [[LD32imm7_1]]
+  ; CHECK-NEXT:   STR32 killed [[OR32rr]], [[COPY2]], 4 :: (store (s32))
+  ; CHECK-NEXT:   [[LD32imm7_2:%[0-9]+]]:gpr32 = LD32imm7 4
+  ; CHECK-NEXT:   [[LD16imm7_1:%[0-9]+]]:gpr16 = LD16imm7 7
+  ; CHECK-NEXT:   [[SHL32rr2:%[0-9]+]]:gpr32 = SHL32rr [[LD32imm7_2]], [[LD16imm7_1]]
+  ; CHECK-NEXT:   [[SHL32rr3:%[0-9]+]]:gpr32 = SHL32rr [[SHL32rr2]], [[LD16imm7_1]]
+  ; CHECK-NEXT:   [[LD32imm7_3:%[0-9]+]]:gpr32 = LD32imm7 0
+  ; CHECK-NEXT:   STR32 killed [[SHL32rr3]], [[COPY2]], 0 :: (store (s32), align 8)
   ; CHECK-NEXT:   $r0 = COPY [[COPY]]
   ; CHECK-NEXT:   RETURN implicit $r0
   %struct1 = insertvalue %struct.nested undef, i16 0, 0

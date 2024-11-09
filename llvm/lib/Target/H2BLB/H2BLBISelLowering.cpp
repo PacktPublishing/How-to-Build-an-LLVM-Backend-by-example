@@ -363,6 +363,9 @@ H2BLBTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
   switch (MI.getOpcode()) {
   default:
     llvm_unreachable("Custom inserter not yet implemented");
+  case H2BLB::LD16imm16:
+  case H2BLB::LD32imm32:
+    return emitLDimm(MI);
   case H2BLB::RET_PSEUDO:
     return emitRET_PSEUDO(MI);
   case H2BLB::PTR_ADD16rr:
@@ -370,6 +373,107 @@ H2BLBTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
     break;
   }
   return BB;
+}
+
+MachineBasicBlock *H2BLBTargetLowering::emitLDimm(MachineInstr &MI) const {
+  assert(MI.getOpcode() == H2BLB::LD16imm16 ||
+         MI.getOpcode() == H2BLB::LD32imm32);
+  bool Is32Bit = MI.getOpcode() == H2BLB::LD32imm32;
+  MachineBasicBlock &MBB = *MI.getParent();
+  MachineFunction &MF = *MBB.getParent();
+  const TargetInstrInfo &TII = *Subtarget.getInstrInfo();
+  MachineRegisterInfo &MRI = MF.getRegInfo();
+
+  // When using FastISel we may end up with this pseudo whereas the
+  // immediate may fit the encoding already.
+  // Try re-selecting the instruction.
+  int64_t RawImmVal = MI.getOperand(1).getImm();
+  assert(Is32Bit || (RawImmVal <= std::numeric_limits<int16_t>::max() &&
+                     RawImmVal >= std::numeric_limits<int16_t>::min()) &&
+                        "immediate value out of range");
+  uint32_t ImmVal = RawImmVal & (Is32Bit ? 0xFFFFFFFF : 0xFFFF);
+  // We build the whole constant backward to reuse the 7 constant.
+  // Here is the sequence for 16-bit:
+  // v2 = LDimm 7-bit chunk2
+  // acc = v2
+  // acc <<= 7
+  // v1 = LDimm 7-bit chunk1
+  // acc |= v1
+  // acc <<= 7
+  // v0 = LDimm 7-bit chunk0
+  // acc |= v0
+  Register Accumulator;
+  Register FinalReg = MI.getOperand(0).getReg();
+  bool PreviousChunksAreZero = true;
+  constexpr unsigned ChunkSize = 7;
+  constexpr unsigned ChunkMask = (1 << ChunkSize) - 1;
+  const MCInstrDesc &LdImmDesc =
+      Is32Bit ? TII.get(H2BLB::LD32imm7) : TII.get(H2BLB::LD16imm7);
+  MachineInstr *LastMI;
+  Register ChunkSizeReg;
+  const TargetRegisterClass *AccRC =
+      Is32Bit ? &H2BLB::GPR32RegClass : &H2BLB::GPR16RegClass;
+  unsigned ShlOpc = Is32Bit ? H2BLB::SHL32rr : H2BLB::SHL16rr;
+  unsigned OrOpc = Is32Bit ? H2BLB::OR32rr : H2BLB::OR16rr;
+
+  auto MaterializeChunkSizeReg = [&]() {
+    if (ChunkSizeReg == H2BLB::NoRegister) {
+      // The constant used in the shift is always a 16-bit value.
+      ChunkSizeReg = MRI.createVirtualRegister(&H2BLB::GPR16RegClass);
+      BuildMI(MBB, MI, MI.getDebugLoc(), TII.get(H2BLB::LD16imm7), ChunkSizeReg)
+          .addImm(ChunkSize);
+    }
+  };
+
+  for (int ChunkNb = (16 + 16 * Is32Bit) / ChunkSize; ChunkNb != -1;
+       --ChunkNb) {
+    unsigned ChunkShift = ChunkNb * ChunkSize;
+    uint32_t CurChunk = ImmVal & (ChunkMask << ChunkShift);
+    CurChunk >>= ChunkShift;
+    if (!PreviousChunksAreZero) {
+      Register NewAcc = MRI.createVirtualRegister(AccRC);
+      assert(Accumulator != H2BLB::NoRegister &&
+             "We should have seen a non-zero chunk");
+      MaterializeChunkSizeReg();
+      LastMI = BuildMI(MBB, MI, MI.getDebugLoc(), TII.get(ShlOpc), NewAcc)
+                   .addReg(Accumulator)
+                   .addReg(ChunkSizeReg);
+      Accumulator = NewAcc;
+    }
+    Register CurChunkReg = MRI.createVirtualRegister(AccRC);
+    if (ChunkNb == 0 ) {
+      MI.setDesc(LdImmDesc);
+      MI.getOperand(0).setReg(CurChunkReg);
+      MI.getOperand(1).setImm(CurChunk);
+      if (CurChunk || PreviousChunksAreZero)
+        LastMI = &MI;
+    } else if (CurChunk) {
+      LastMI = BuildMI(MBB, MI, MI.getDebugLoc(), LdImmDesc, CurChunkReg)
+                   .addImm(CurChunk);
+    }
+    if (CurChunk) {
+      if (PreviousChunksAreZero)
+        Accumulator = LastMI->getOperand(0).getReg();
+      else {
+        assert(Accumulator != H2BLB::NoRegister &&
+               "We should have seen a non-zero chunk");
+        Register NewAcc = MRI.createVirtualRegister(AccRC);
+        // We tweak the insertion point here because we use MI as the LDImm for
+        // the last chunk, thus if we have to insert something, we have to
+        // insert it after MI, not before.
+        LastMI = BuildMI(MBB,
+                         (ChunkNb == 0) ? std::next(MI.getIterator())
+                                        : MI.getIterator(),
+                         MI.getDebugLoc(), TII.get(OrOpc), NewAcc)
+                     .addReg(Accumulator)
+                     .addReg(CurChunkReg);
+        Accumulator = NewAcc;
+      }
+      PreviousChunksAreZero = false;
+    }
+  }
+  LastMI->getOperand(0).setReg(FinalReg);
+  return &MBB;
 }
 
 MachineBasicBlock *H2BLBTargetLowering::emitRET_PSEUDO(MachineInstr &MI) const {

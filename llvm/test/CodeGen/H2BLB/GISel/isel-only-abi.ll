@@ -37,8 +37,12 @@ define i16 @retCst() {
   ; CHECK-NEXT:   liveins: $r0
   ; CHECK-NEXT: {{  $}}
   ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
-  ; CHECK-NEXT:   [[LD16imm16_:%[0-9]+]]:gpr16 = LD16imm16 132
-  ; CHECK-NEXT:   $r1 = COPY [[LD16imm16_]]
+  ; CHECK-NEXT:   [[LD16imm7_:%[0-9]+]]:gpr16 = LD16imm7 1
+  ; CHECK-NEXT:   [[LD16imm7_1:%[0-9]+]]:gpr16 = LD16imm7 7
+  ; CHECK-NEXT:   [[SHL16rr:%[0-9]+]]:gpr16 = SHL16rr [[LD16imm7_]], [[LD16imm7_1]]
+  ; CHECK-NEXT:   [[LD16imm7_2:%[0-9]+]]:gpr16 = LD16imm7 4
+  ; CHECK-NEXT:   [[OR16rr:%[0-9]+]]:gpr16 = OR16rr [[SHL16rr]], [[LD16imm7_2]]
+  ; CHECK-NEXT:   $r1 = COPY [[OR16rr]]
   ; CHECK-NEXT:   $r0 = COPY [[COPY]]
   ; CHECK-NEXT:   RETURN implicit $r1, implicit $r0
   ret i16 132

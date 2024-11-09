@@ -30,8 +30,8 @@ define i16 @addi16Imm(i16 %a) {
   ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
   ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr16 = COPY $r1
   ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr16 = COPY killed [[COPY1]]
-  ; CHECK-NEXT:   [[LD16imm16_:%[0-9]+]]:gpr16 = LD16imm16 6
-  ; CHECK-NEXT:   [[ADDi16rr:%[0-9]+]]:gpr16 = ADDi16rr [[COPY2]], [[LD16imm16_]]
+  ; CHECK-NEXT:   [[LD16imm7_:%[0-9]+]]:gpr16 = LD16imm7 6
+  ; CHECK-NEXT:   [[ADDi16rr:%[0-9]+]]:gpr16 = ADDi16rr [[COPY2]], [[LD16imm7_]]
   ; CHECK-NEXT:   $r1 = COPY [[ADDi16rr]]
   ; CHECK-NEXT:   $r0 = COPY [[COPY]]
   ; CHECK-NEXT:   RETURN implicit $r0, implicit $r1
@@ -48,8 +48,8 @@ define i32 @addi32Imm(i32 %a) {
   ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
   ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:gpr32 = COPY $d1
   ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr32 = COPY killed [[COPY1]]
-  ; CHECK-NEXT:   [[LD32imm32_:%[0-9]+]]:gpr32 = LD32imm32 6
-  ; CHECK-NEXT:   [[ADDi32rr:%[0-9]+]]:gpr32 = ADDi32rr [[COPY2]], [[LD32imm32_]]
+  ; CHECK-NEXT:   [[LD32imm7_:%[0-9]+]]:gpr32 = LD32imm7 6
+  ; CHECK-NEXT:   [[ADDi32rr:%[0-9]+]]:gpr32 = ADDi32rr [[COPY2]], [[LD32imm7_]]
   ; CHECK-NEXT:   $d1 = COPY [[ADDi32rr]]
   ; CHECK-NEXT:   $r0 = COPY [[COPY]]
   ; CHECK-NEXT:   RETURN implicit $r0, implicit $d1

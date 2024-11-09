@@ -32,6 +32,9 @@ class H2BLBTargetMachine;
 class H2BLBTargetLowering : public TargetLowering {
   const H2BLBSubtarget &Subtarget;
 
+  /// Custom inserter for the load immeidate instructions.
+  MachineBasicBlock *emitLDimm(MachineInstr &MI) const;
+
   /// Custom inserter for the RET_PSEUDO instruction.
   MachineBasicBlock *emitRET_PSEUDO(MachineInstr &MI) const;
 

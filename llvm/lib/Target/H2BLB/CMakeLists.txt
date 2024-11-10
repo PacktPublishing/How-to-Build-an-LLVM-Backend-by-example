@@ -36,6 +36,7 @@ add_llvm_target(H2BLBCodeGen
 
   # GlobalISel related files.
   GISel/H2BLBCallLowering.cpp
+  GISel/H2BLBLegalizerInfo.cpp
 
   LINK_COMPONENTS
   H2BLBDesc

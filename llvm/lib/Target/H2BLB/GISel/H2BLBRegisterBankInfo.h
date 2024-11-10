@@ -15,6 +15,7 @@
 #include "MCTargetDesc/H2BLBMCTargetDesc.h"
 #include "llvm/CodeGen/RegisterBankInfo.h"
 #include "llvm/CodeGen/TargetRegisterInfo.h"
+#include "llvm/CodeGenTypes/LowLevelType.h"
 
 #define GET_REGBANK_DECLARATIONS
 #include "H2BLBGenRegisterBank.inc"
@@ -31,6 +32,12 @@ protected:
 class H2BLBRegisterBankInfo final : public H2BLBGenRegisterBankInfo {
 public:
   H2BLBRegisterBankInfo(const TargetRegisterInfo &TRI);
+
+  const InstructionMapping &
+  getInstrMapping(const MachineInstr &MI) const override;
+
+  const RegisterBank &getRegBankFromRegClass(const TargetRegisterClass &RC,
+                                             LLT Ty) const override;
 };
 } // namespace llvm
 

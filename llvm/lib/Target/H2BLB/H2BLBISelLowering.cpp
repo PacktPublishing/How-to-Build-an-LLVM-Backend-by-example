@@ -376,8 +376,12 @@ void H2BLBTargetLowering::finalizeLowering(MachineFunction &MF) const {
   for (MachineBasicBlock &MaybeExitMBB : MF) {
     if (!MaybeExitMBB.succ_empty())
       continue;
-    assert(MaybeExitMBB.getFirstTerminator() != MaybeExitMBB.end() &&
-           "Exit block must have a terminator");
+    if (MaybeExitMBB.getFirstTerminator() == MaybeExitMBB.end()) {
+      // Check if this is an unreachable block.
+      assert(MaybeExitMBB.pred_empty() && &MaybeExitMBB != &*MF.begin() &&
+             "Exit block must have a terminator");
+      continue;
+    }
     assert(
         (MaybeExitMBB.getFirstTerminator()->getOpcode() == H2BLB::RETURN ||
          MaybeExitMBB.getFirstTerminator()->getOpcode() == H2BLB::RET_PSEUDO) &&

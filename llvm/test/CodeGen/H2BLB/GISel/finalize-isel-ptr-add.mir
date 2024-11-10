@@ -14,15 +14,13 @@ body: |
     liveins: $r1, $r2
 
     ; CHECK-LABEL: name: selectAdd
-    ; CHECK: liveins: $r1, $r2, $r0, $r0
+    ; CHECK: liveins: $r1, $r2, $r0
     ; CHECK-NEXT: {{  $}}
     ; CHECK-NEXT: [[COPY:%[0-9]+]]:gpr16 = COPY $r0
-    ; CHECK-NEXT: [[COPY1:%[0-9]+]]:gpr16 = COPY $r0
-    ; CHECK-NEXT: [[COPY2:%[0-9]+]]:gpr16 = COPY $r1
-    ; CHECK-NEXT: [[COPY3:%[0-9]+]]:gpr16 = COPY $r2
-    ; CHECK-NEXT: [[ADDi16rr:%[0-9]+]]:gpr16 = ADDi16rr [[COPY2]], [[COPY3]]
+    ; CHECK-NEXT: [[COPY1:%[0-9]+]]:gpr16 = COPY $r1
+    ; CHECK-NEXT: [[COPY2:%[0-9]+]]:gpr16 = COPY $r2
+    ; CHECK-NEXT: [[ADDi16rr:%[0-9]+]]:gpr16 = ADDi16rr [[COPY1]], [[COPY2]]
     ; CHECK-NEXT: $r1 = COPY [[ADDi16rr]]
-    ; CHECK-NEXT: $r0 = COPY [[COPY1]]
     ; CHECK-NEXT: $r0 = COPY [[COPY]]
     ; CHECK-NEXT: RETURN implicit $r1, implicit $r0
     %0:gprb(p0) = COPY $r1

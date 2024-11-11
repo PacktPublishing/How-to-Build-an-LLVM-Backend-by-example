@@ -33,7 +33,10 @@ H2BLBLegalizerInfo::H2BLBLegalizerInfo(const H2BLBSubtarget &ST) {
       .clampScalar(0, s16, s32);
 
   // Load and store.
-  getActionDefinitionsBuilder({TargetOpcode::G_LOAD, TargetOpcode::G_STORE})
+  // Note that technically the G_<S|Z>EXTLOAD don't need as many legal types,
+  // but this is convenient to reuse the same rules for all loads and stores.
+  getActionDefinitionsBuilder({TargetOpcode::G_LOAD, TargetOpcode::G_SEXTLOAD,
+                               TargetOpcode::G_ZEXTLOAD, TargetOpcode::G_STORE})
       .legalForTypesWithMemDesc({{s8, p0, s8, 8},
                                  {s16, p0, s8, 8}, // anyext/truncstore
                                  {s16, p0, s16, 8},

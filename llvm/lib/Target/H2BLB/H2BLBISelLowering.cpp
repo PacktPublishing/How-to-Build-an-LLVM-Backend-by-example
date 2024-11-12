@@ -31,6 +31,9 @@ H2BLBTargetLowering::H2BLBTargetLowering(const TargetMachine &TM,
   addRegisterClass(MVT::i32, &H2BLB::GPR32RegClass);
   addRegisterClass(MVT::f32, &H2BLB::GPR32RegClass);
 
+  // The only truncstore we have is from i16 to i8.
+  setTruncStoreAction(MVT::i32, MVT::i16, Expand);
+
   // Tell the generic implementation that we are done with setting up our
   // register classes.
   computeRegisterProperties(Subtarget.getRegisterInfo());

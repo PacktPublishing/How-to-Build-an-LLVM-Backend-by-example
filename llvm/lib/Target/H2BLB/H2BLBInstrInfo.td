@@ -240,3 +240,7 @@ def : Pat<(vector_extract (v2i16 GPR32:$rs), (i16 0)),
           (i16 (EXTRACT_SUBREG GPR32:$rs, sub_low16))>;
 def : Pat<(vector_extract (v2i16 GPR32:$rs), (i16 1)),
           (i16 (EXTRACT_SUBREG GPR32:$rs, sub_high16))>;
+
+// Build a 32-bit register from 2 16-bit registers.
+def : Pat<(v2i16 (build_vector GPR16:$a, GPR16:$b)),
+          (v2i16 (REG_SEQUENCE GPR32, $a, sub_low16, $b, sub_high16))>;

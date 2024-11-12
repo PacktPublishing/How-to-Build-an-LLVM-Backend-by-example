@@ -87,6 +87,10 @@ def LDR32 : H2BLBLoadInstruction<"ldr32",
                                  /*is32Bit=*/1> {
   let Pattern = [(set (i32 GPR32:$dst), (load (addrmode GPR16:$addr, uimm4:$offset)))];
 }
+def : Pat<(v2i16 (load (addrmode GPR16:$addr, uimm4:$offset))),
+          (LDR32 $addr, $offset)>;
+
+
 def LDRSEXT8: H2BLBExtLoadInstruction<"ldrsext8", /*isZExt=*/0> {
   let Pattern = [(set GPR16:$dst, (sextload (addrmode GPR16:$addr, uimm4:$offset)))];
 }
@@ -127,6 +131,8 @@ def STR32 : H2BLBStoreInstruction<"str32",
                                  /*is32Bit=*/1> {
   let Pattern = [(store (i32 GPR32:$src), (addrmode GPR16:$addr, uimm4:$offset))];
 }
+def : Pat<(store (v2i16 GPR32:$src), (addrmode GPR16:$addr, uimm4:$offset)),
+          (STR32 $src, $addr, $offset)>;
 
 def TRUNCSTR8: H2BLBInstruction<"truncstr8", "$src, $addr, $offset",
                                  /*opcode=*/0b01110,
@@ -190,6 +196,7 @@ def LDRSP16: H2BLBLoadSPInstruction<"ldrsp16", /*is32Bit=*/0> {
 def LDRSP32: H2BLBLoadSPInstruction<"ldrsp32", /*is32Bit=*/1> {
   let Pattern = [(set (i32 GPR32:$dst), (load (spaddrmode OnlySP:$sp, simm7:$offset)))];
 }
+def : Pat<(v2i16 (load (spaddrmode OnlySP:$addr, simm7:$offset))), (LDRSP32 $addr, $offset)>;
 
 def LDRSEXTSP8: H2BLBExtLoadSPInstruction<"ldrsextsp8", /*isZExt=*/0> {
   let Pattern = [(set GPR16:$dst, (sextload (spaddrmode OnlySP:$sp, simm7:$offset)))];
@@ -222,7 +229,7 @@ let Pattern = [(set GPR16:$dst, (and GPR16:$src0, GPR16:$src1))] in
 def AND16rr : H2BLBBinaryInstruction<"and16",
                                      /*opcode=*/0b01100,
                                      /*is32Bit=*/false>;
-let Pattern = [(set GPR32:$dst, (and GPR32:$src0, GPR32:$src1))] in
+let Pattern = [(set (i32 GPR32:$dst), (and GPR32:$src0, GPR32:$src1))] in
 def AND32rr : H2BLBBinaryInstruction<"and32",
                                      /*opcode=*/0b01100,
                                      /*is32Bit=*/true>;

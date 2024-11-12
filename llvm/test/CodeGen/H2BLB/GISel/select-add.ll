@@ -28,3 +28,19 @@ define ptr @ptrAdd(ptr %base, i16 %offset) {
   %addr = getelementptr i8, ptr %base, i16 %offset
   ret ptr %addr
 }
+
+define <2 x i16> @addv2i16(<2 x i16> %a) {
+; CHECK-LABEL: addv2i16:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    subsp sp, sp, 4
+; CHECK-NEXT:    strsp32 d2, sp, 0 # 4-byte Folded Spill
+; CHECK-NEXT:    ldrsp32 d1, sp, 4
+; CHECK-NEXT:    addi16 r4, r2, r2
+; CHECK-NEXT:    addi16 r5, r3, r3
+; CHECK-NEXT:    str32 d2, r1, 0
+; CHECK-NEXT:    ldrsp32 d2, sp, 0 # 4-byte Folded Reload
+; CHECK-NEXT:    addsp sp, sp, 4
+; CHECK-NEXT:    ret
+  %res = add <2 x i16> %a, %a
+  ret <2 x i16> %res
+}

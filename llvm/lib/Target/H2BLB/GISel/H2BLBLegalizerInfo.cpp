@@ -50,6 +50,10 @@ H2BLBLegalizerInfo::H2BLBLegalizerInfo(const H2BLBSubtarget &ST) : ST(ST) {
       .lowerIf([=](const LegalityQuery &Query) {
         return Query.Types[0].isScalar() &&
                Query.Types[0] != Query.MMODescrs[0].MemoryTy;
+      })
+      .legalIf([=](const LegalityQuery &Query) {
+        TypeSize Size = Query.Types[0].getSizeInBits();
+        return Size == 16 || Size == 32;
       });
 
   // Pointer-handling.

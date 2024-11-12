@@ -233,3 +233,10 @@ let Pattern = [(set (i32 GPR32:$dst), (and GPR32:$src0, GPR32:$src1))] in
 def AND32rr : H2BLBBinaryInstruction<"and32",
                                      /*opcode=*/0b01100,
                                      /*is32Bit=*/true>;
+
+// Patterns to deal with breaking up a GPR32 into GPR16 chunks.
+def : GINodeEquiv<G_EXTRACT_VECTOR_ELT, vector_extract>;
+def : Pat<(vector_extract (v2i16 GPR32:$rs), (i16 0)),
+          (i16 (EXTRACT_SUBREG GPR32:$rs, sub_low16))>;
+def : Pat<(vector_extract (v2i16 GPR32:$rs), (i16 1)),
+          (i16 (EXTRACT_SUBREG GPR32:$rs, sub_high16))>;

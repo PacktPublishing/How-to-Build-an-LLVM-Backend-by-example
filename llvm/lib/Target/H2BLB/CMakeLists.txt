@@ -21,6 +21,8 @@ tablegen(LLVM H2BLBGenRegisterBank.inc -gen-register-bank)
 tablegen(LLVM H2BLBGenGlobalISel.inc -gen-global-isel)
 tablegen(LLVM H2BLBGenMandatoryPreLegalizeGICombiner.inc -gen-global-isel-combiner
               -combiners="H2BLBMandatoryPreLegalizerCombiner")
+tablegen(LLVM H2BLBGenMandatoryPostLegalizeGICombiner.inc -gen-global-isel-combiner
+              -combiners="H2BLBMandatoryPostLegalizerCombiner")
 
 add_public_tablegen_target(H2BLBCommonTableGen)
 
@@ -47,6 +49,7 @@ add_llvm_target(H2BLBCodeGen
   GISel/H2BLBLegalizerInfo.cpp
   GISel/H2BLBMandatoryPreLegalizerCombiner.cpp
   GISel/H2BLBRegisterBankInfo.cpp
+  GISel/H2BLBMandatoryPostLegalizerCombiner.cpp
 
   LINK_COMPONENTS
   H2BLBDesc

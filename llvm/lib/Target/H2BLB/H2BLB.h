@@ -43,6 +43,9 @@ Pass *createH2BLBISelDAG(H2BLBTargetMachine &TM);
 void initializeH2BLBMandatoryPreLegalizerCombinerPass(PassRegistry &);
 Pass *createH2BLBMandatoryPreLegalizerCombiner();
 
+void initializeH2BLBMandatoryPostLegalizerCombinerPass(PassRegistry &);
+Pass *createH2BLBMandatoryPostLegalizerCombiner();
+
 namespace H2BLB {
 FastISel *createFastISel(FunctionLoweringInfo &FuncInfo,
                          const TargetLibraryInfo *LibInfo);

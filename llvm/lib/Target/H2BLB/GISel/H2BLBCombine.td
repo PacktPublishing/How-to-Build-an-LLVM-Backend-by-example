@@ -23,3 +23,16 @@ def insertvectorelt_to_build_vector : GICombineRule<
 def H2BLBMandatoryPreLegalizerCombiner: GICombiner<
   "H2BLBMandatoryPreLegalizerCombinerImpl", [optnone_combines, insertvectorelt_to_build_vector]> {
 }
+
+// Turn G_UNMERGE_VALUES -> G_EXTRACT_VECTOR_ELT's
+// This implementation comes from AArch64, this should just put it in the legalizer helper.
+def vector_unmerge_lowering : GICombineRule <
+  (defs root:$root),
+  (match (wip_match_opcode G_UNMERGE_VALUES):$root,
+          [{ return matchScalarizeVectorUnmerge(*${root}, MRI); }]),
+  (apply [{ applyScalarizeVectorUnmerge(*${root}, MRI, B); }])
+>;
+
+def H2BLBMandatoryPostLegalizerCombiner : GICombiner<
+  "H2BLBMandatoryPostLegalizerCombinerImpl", [vector_unmerge_lowering]> {
+}

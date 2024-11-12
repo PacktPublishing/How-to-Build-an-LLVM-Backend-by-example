@@ -36,6 +36,7 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeH2BLBTarget() {
   PassRegistry &PR = *PassRegistry::getPassRegistry();
   initializeH2BLBSimpleConstantPropagationPass(PR);
   initializeH2BLBMandatoryPreLegalizerCombinerPass(PR);
+  initializeH2BLBMandatoryPostLegalizerCombinerPass(PR);
   initializeGlobalISel(PR);
 }
 
@@ -130,6 +131,10 @@ void H2BLBPassConfig::addPreLegalizeMachineIR() {
 bool H2BLBPassConfig::addLegalizeMachineIR() {
   addPass(new Legalizer());
   return false;
+}
+
+void H2BLBPassConfig::addPreRegBankSelect() {
+  addPass(createH2BLBMandatoryPostLegalizerCombiner());
 }
 
 bool H2BLBPassConfig::addRegBankSelect() {

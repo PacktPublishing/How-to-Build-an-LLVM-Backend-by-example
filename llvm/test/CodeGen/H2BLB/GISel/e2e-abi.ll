@@ -41,6 +41,8 @@ define i32 @oneArgi32(i32 %arg) {
 define <2 x i16> @oneArgv2i16(<2 x i16> %arg) {
 ; CHECK-LABEL: oneArgv2i16:
 ; CHECK:       # %bb.0:
+; CHECK-NEXT:    ldrsp32 d1, sp, 0
+; CHECK-NEXT:    str32 d1, r1, 0
 ; CHECK-NEXT:    ret
   ret <2 x i16> %arg
 }
@@ -48,6 +50,9 @@ define <2 x i16> @oneArgv2i16(<2 x i16> %arg) {
 define <2 x i16> @twoArgsi16(i16 %arg, i16 %arg1) {
 ; CHECK-LABEL: twoArgsi16:
 ; CHECK:       # %bb.0:
+; CHECK-NEXT:    # kill: def $r2 killed $r2 killed $d1 def $d1
+; CHECK-NEXT:    # kill: def $r3 killed $r3 killed $d1 def $d1
+; CHECK-NEXT:    str32 d1, r1, 0
 ; CHECK-NEXT:    ret
   %partial = insertelement <2 x i16> poison, i16 %arg, i32 0
   %res = insertelement <2 x i16> %partial, i16 %arg1, i32 1

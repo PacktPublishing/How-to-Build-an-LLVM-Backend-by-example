@@ -130,6 +130,9 @@ def TRUNCSTR8: H2BLBInstruction<"truncstr8", "$src, $addr, $offset",
 }
 def : Pat<(store (i8 (trunc GPR16:$src)), (addrmode GPR16:$addr, uimm4:$offset)), (TRUNCSTR8 GPR16:$src, GPR16:$addr, uimm4:$offset)>;
 
+def : Pat<(i16 (trunc (i32 GPR32:$src))),
+          (i16 (EXTRACT_SUBREG GPR32:$src, sub_low16))>;
+
 def MOV16 : H2BLBMoveInstruction<"mov16", /*is32Bit=*/0>;
 def MOV32 : H2BLBMoveInstruction<"mov32", /*is32Bit=*/1>;
 

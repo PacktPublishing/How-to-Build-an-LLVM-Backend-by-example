@@ -45,7 +45,9 @@ H2BLBLegalizerInfo::H2BLBLegalizerInfo(const H2BLBSubtarget &ST) {
   getActionDefinitionsBuilder(TargetOpcode::G_PTR_ADD).legalFor({{p0, s16}});
 
   // Arithmetic.
-  getActionDefinitionsBuilder(TargetOpcode::G_ADD).legalFor({s16});
+  getActionDefinitionsBuilder(TargetOpcode::G_ADD)
+      .legalFor({s16, s32})
+      .clampScalar(0, s16, s32);
 
   getLegacyLegalizerInfo().computeTables();
 }

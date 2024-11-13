@@ -127,3 +127,16 @@ define void @threeArgsi16(i16 %arg, i16 %arg1, i16 %arg2) {
   ; CHECK-NEXT:   RETURN implicit $r0
   ret void
 }
+
+define i32 @ret32Cst() {
+  ; CHECK-LABEL: name: ret32Cst
+  ; CHECK: bb.0 (%ir-block.0):
+  ; CHECK-NEXT:   liveins: $r0
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr16 = COPY $r0
+  ; CHECK-NEXT:   [[LD32imm32_:%[0-9]+]]:gpr32 = LD32imm32 12
+  ; CHECK-NEXT:   $d1 = COPY [[LD32imm32_]]
+  ; CHECK-NEXT:   $r0 = COPY [[COPY]]
+  ; CHECK-NEXT:   RETURN implicit $r0, implicit $d1
+  ret i32 12
+}

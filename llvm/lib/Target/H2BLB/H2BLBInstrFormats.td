@@ -55,6 +55,10 @@ def gi_addrmode :
   GIComplexOperandMatcher<p0, "selectAddrMode">,
   GIComplexPatternEquiv<addrmode>;
 
+def gi_spaddrmode :
+  GIComplexOperandMatcher<p0, "selectSPAddrMode">,
+  GIComplexPatternEquiv<spaddrmode>;
+
 // Instruction templates.
 
 class H2BLBInstruction<string asm, string operands,

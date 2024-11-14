@@ -16,7 +16,7 @@ body: |
     ; CHECK: liveins: $r1, $r0
     ; CHECK-NEXT: {{  $}}
     ; CHECK-NEXT: [[COPY:%[0-9]+]]:gpr16 = COPY $r0
-    ; CHECK-NEXT: [[COPY1:%[0-9]+]]:gpr16sp = COPY $r1
+    ; CHECK-NEXT: [[COPY1:%[0-9]+]]:gpr16 = COPY $r1
     ; CHECK-NEXT: $r1 = COPY [[COPY1]]
     ; CHECK-NEXT: $r0 = COPY [[COPY]]
     ; CHECK-NEXT: RET_PSEUDO implicit $r1

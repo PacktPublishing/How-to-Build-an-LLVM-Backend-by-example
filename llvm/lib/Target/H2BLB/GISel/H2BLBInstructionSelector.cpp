@@ -120,6 +120,14 @@ bool H2BLBInstructionSelector::select(MachineInstr &I) {
     // For PHIs and COPYs, we only need to assigned a register class.
     setRegisterClassForOperands(I, MRI);
     return true;
+  case TargetOpcode::G_FRAME_INDEX: {
+    // Frame index are ultimately SP + something.
+    // We'll materialize the ADD when we know the offset at frame lowering time.
+    // This may require an emergency spill slot.
+    I.setDesc(TII.get(H2BLB::MOVFROMSP));
+    return constrainSelectedInstRegOperands(I, TII, TRI, RBI);
+  }
+
   default:
     if (selectImpl(I, *CoverageInfo))
       return true;

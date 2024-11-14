@@ -64,3 +64,70 @@ define i32 @loadi32PlusTooBigImm(ptr %arg) {
   ret i32 %res
 }
 
+define i16 @sextload(ptr %arg) {
+; CHECK-LABEL: sextload:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ldrsext8 r1, r1, 0
+; CHECK-NEXT:    ret
+  %ld = load i8, ptr %arg
+  %res = sext i8 %ld to i16
+  ret i16 %res
+}
+
+define i16 @sextloadPlusImm(ptr %arg) {
+; CHECK-LABEL: sextloadPlusImm:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ldrsext8 r1, r1, 3
+; CHECK-NEXT:    ret
+  %addr = getelementptr i8, ptr %arg, i16 3
+  %ld = load i8, ptr %addr
+  %res = sext i8 %ld to i16
+  ret i16 %res
+}
+
+define i16 @sextloadPlusImmTooBig(ptr %arg) {
+; CHECK-LABEL: sextloadPlusImmTooBig:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ldi16 r2, 16
+; CHECK-NEXT:    addi16 r1, r1, r2
+; CHECK-NEXT:    ldrsext8 r1, r1, 0
+; CHECK-NEXT:    ret
+  %addr = getelementptr i8, ptr %arg, i16 16
+  %ld = load i8, ptr %addr
+  %res = sext i8 %ld to i16
+  ret i16 %res
+}
+
+define i16 @zextload(ptr %arg) {
+; CHECK-LABEL: zextload:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ldrzext8 r1, r1, 0
+; CHECK-NEXT:    ret
+  %ld = load i8, ptr %arg
+  %res = zext i8 %ld to i16
+  ret i16 %res
+}
+
+define i16 @zextloadPlusImm(ptr %arg) {
+; CHECK-LABEL: zextloadPlusImm:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ldrzext8 r1, r1, 3
+; CHECK-NEXT:    ret
+  %addr = getelementptr i8, ptr %arg, i16 3
+  %ld = load i8, ptr %addr
+  %res = zext i8 %ld to i16
+  ret i16 %res
+}
+
+define i16 @zextloadPlusImmTooBig(ptr %arg) {
+; CHECK-LABEL: zextloadPlusImmTooBig:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ldi16 r2, 16
+; CHECK-NEXT:    addi16 r1, r1, r2
+; CHECK-NEXT:    ldrzext8 r1, r1, 0
+; CHECK-NEXT:    ret
+  %addr = getelementptr i8, ptr %arg, i16 16
+  %ld = load i8, ptr %addr
+  %res = zext i8 %ld to i16
+  ret i16 %res
+}

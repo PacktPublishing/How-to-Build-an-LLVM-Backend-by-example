@@ -138,7 +138,11 @@ bool H2BLBInstructionSelector::select(MachineInstr &I) {
 
 InstructionSelector::ComplexRendererFns
 H2BLBInstructionSelector::selectAddrMode(MachineOperand &Root) const {
-  if (!Root.isReg())
+  // Here we check if the SP addr mode applies before checking this one.
+  // Technically this is a hack because it is supposed to be handled at
+  // the .td level with the AddedComplexity. However TableGen does
+  // something unexpected with the AddedComplexity with extload.
+  if (selectSPAddrMode(Root) != std::nullopt)
     return std::nullopt;
 
   MachineRegisterInfo &MRI =

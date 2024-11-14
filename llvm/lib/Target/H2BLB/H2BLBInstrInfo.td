@@ -87,6 +87,15 @@ def LDR32 : H2BLBLoadInstruction<"ldr32",
                                  /*is32Bit=*/1> {
   let Pattern = [(set (i32 GPR32:$dst), (load (addrmode GPR16:$addr, uimm4:$offset)))];
 }
+def LDRSEXT8: H2BLBExtLoadInstruction<"ldrsext8", /*isZExt=*/0> {
+  let Pattern = [(set GPR16:$dst, (sextload (addrmode GPR16:$addr, uimm4:$offset)))];
+}
+def LDRZEXT8: H2BLBExtLoadInstruction<"ldrzext8", /*isZExt=*/1> {
+  let Pattern = [(set GPR16:$dst, (zextload (addrmode GPR16:$addr, uimm4:$offset)))];
+}
+// Match any_ext(load) on zextload.
+def : Pat<(i16 (extload (addrmode GPR16:$addr, simm7:$offset))),
+          (LDRZEXT8 GPR16:$addr, uimm4:$offset)>;
 
 let isCall = 1, Defs = [R0], Uses = [SP] in
 def CALL : H2BLBInstruction<"call", "$tgt",

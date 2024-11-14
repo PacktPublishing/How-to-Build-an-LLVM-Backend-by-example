@@ -49,6 +49,7 @@ private:
   bool selectImpl(MachineInstr &I, CodeGenCoverage &CoverageInfo) const;
 
   ComplexRendererFns selectAddrMode(MachineOperand &Root) const;
+  ComplexRendererFns selectSPAddrMode(MachineOperand &Root) const;
 
   const H2BLBInstrInfo &TII;
   const H2BLBRegisterInfo &TRI;
@@ -92,7 +93,7 @@ static void setRegisterClassForOperands(MachineInstr &I,
     if (RC)
       continue;
     unsigned Size = MRI.getType(Reg).getSizeInBits();
-    MRI.setRegClass(Reg, Size == 16 ? &H2BLB::GPR16spRegClass
+    MRI.setRegClass(Reg, Size == 16 ? &H2BLB::GPR16RegClass
                                     : &H2BLB::GPR32RegClass);
   }
 }
@@ -168,6 +169,93 @@ H2BLBInstructionSelector::selectAddrMode(MachineOperand &Root) const {
   return {{
       [=](MachineInstrBuilder &MIB) { MIB.addReg(BaseReg); },
       [=](MachineInstrBuilder &MIB) { MIB.addImm(Offset); },
+  }};
+}
+
+InstructionSelector::ComplexRendererFns
+H2BLBInstructionSelector::selectSPAddrMode(MachineOperand &Root) const {
+  if (!Root.isReg())
+    return std::nullopt;
+
+  MachineRegisterInfo &MRI =
+      Root.getParent()->getParent()->getParent()->getRegInfo();
+
+  MachineInstr *RootDef = MRI.getVRegDef(Root.getReg());
+  if (RootDef->getOpcode() == TargetOpcode::G_FRAME_INDEX)
+    return {{
+        [=](MachineInstrBuilder &MIB) {
+          MIB.addFrameIndex(RootDef->getOperand(1).getIndex());
+        },
+        [=](MachineInstrBuilder &MIB) { MIB.addImm(0); },
+    }};
+
+  auto MaybeSPReg = [](MachineInstr &MI) -> bool {
+    if (MI.getOpcode() == TargetOpcode::COPY) {
+      Register Reg = MI.getOperand(1).getReg();
+      return Reg == H2BLB::SP;
+    }
+    return false;
+  };
+
+  auto MaybeFrameIndex = [](MachineInstr &MI) -> std::optional<int> {
+    if (MI.getOpcode() == TargetOpcode::G_FRAME_INDEX)
+      return MI.getOperand(1).getIndex();
+    return std::nullopt;
+  };
+
+  auto MatchSPRegOrIndex = [&MaybeFrameIndex,
+                            &MaybeSPReg](MachineInstr &MI,
+                                         std::optional<int> &Index) -> bool {
+    std::optional<int> MaybeIndex = MaybeFrameIndex(MI);
+    if (MaybeIndex) {
+      Index = *MaybeIndex;
+      return true;
+    }
+    return MaybeSPReg(MI);
+  };
+
+  // On a match, if MaybeIndex is set we are dealing with a FrameIndex,
+  // otherwise we are dealing with SP.
+  std::optional<int> MaybeIndex;
+  bool Matched = false;
+  int64_t CstImm = 0;
+
+  switch (RootDef->getOpcode()) {
+  case TargetOpcode::COPY:
+  case TargetOpcode::G_FRAME_INDEX:
+    Matched = MatchSPRegOrIndex(*RootDef, MaybeIndex);
+    break;
+  case TargetOpcode::G_PTR_ADD: {
+    // Do some matching of ADD + immediate and fold if it fits.
+    std::optional<ValueAndVReg> MaybeConstantInt;
+    if (!mi_match(RootDef->getOperand(2).getReg(), MRI,
+                  m_GCst(MaybeConstantInt)))
+      return std::nullopt;
+
+    CstImm = MaybeConstantInt->Value.getZExtValue();
+    if (CstImm < -64 || CstImm >= 64)
+      return std::nullopt;
+
+    MachineInstr *BaseDef = MRI.getVRegDef(RootDef->getOperand(1).getReg());
+    Matched = MatchSPRegOrIndex(*BaseDef, MaybeIndex);
+    break;
+  }
+  default:
+    Matched = false;
+    break;
+  }
+
+  if (!Matched)
+    return std::nullopt;
+
+  return {{
+      [=](MachineInstrBuilder &MIB) {
+        if (MaybeIndex)
+          MIB.addFrameIndex(*MaybeIndex);
+        else
+          MIB.addReg(H2BLB::SP);
+      },
+      [=](MachineInstrBuilder &MIB) { MIB.addImm(CstImm); },
   }};
 }
 

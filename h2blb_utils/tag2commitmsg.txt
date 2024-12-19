@@ -1,5 +1,59 @@
 # Format is (tag: tag0, ..., tag: tagN) commit message
 # If the line doesn't look like that, it is ignored.
+(tag: end_ch17) [H2BLB][ISel] Add extractelement test
+(tag: sdisel-custom-rewrite_ch17) [H2BLB][SDISel] Add a custom dag combine
+(tag: sdisel-custom-lgl_ch16, tag: end_ch16) [H2BLB][SDISel] Show how to do custom legalization
+(tag: ldimm-custom-inserter_ch17) [H2BLB] Add a custom inserter for lowering LDImm
+(tag: end_ch15, tag: add-callconv-vector_ch15) [H2BLB][ISel] Handle v2i16 as i32 for ABI purposes
+(tag: isel-shl-pat_ch17) [H2BLB] Implement our shift left instructions
+(tag: sdisel-libcall-lgl_ch16) [H2BLB][ISel] Add F32 support via libcalls
+(tag: isel-ext-call-pat_ch17) [H2BLB][ISel] Add external call support
+(tag: sdisel-scalarize-lgl_ch16) [H2BLB] Legalize v2i16 ADD
+(tag: post-legalizer-combiner_ch17) [H2BLB][GISel] Add a post-legalizer combiner to deal with unmerges
+(tag: gisel-node-equiv_ch17) [H2BLB][ISel] Select extract_vector_elt
+(tag: gisel-vector-memop_ch16) [H2BLB][Legalizer] Mark all 16-bit and 32-bit loads/stores legal
+(tag: gisel-lower-memop_ch16) [H2BLB][Legalizer] Support any-extended loads
+(tag: gisel-custom-lgl_ch16) [H2BLB][GISel][Legalizer] Handle G_MUL
+(tag: isel-mul-pat_ch17) [H2BLB][ISel] Select widen mul from IR constructs
+(tag: isel-wmul-intrinsic-pat_ch17) [H2BLB] Select widen mul intrinsics
+(tag: gisel-select-fi_ch17) [H2BLB][GISel] Select G_FRAME_INDEX
+(tag: gisel-addrmode-cplx_ch17) [H2BLB][GISel] Match non-SP addressing mode
+(tag: finalize-lowering-w-gisel_ch17) [H2BLB] Don't run finalizeLowering twice
+(tag: gisel-select-cpy_ch17) [H2BLB][GISel] Select COPY-like instructions
+(tag: pre-legalizer-combiner_ch17) [H2BLB][GISel] Add a pre-legalizer combiner
+(tag: gisel-add-inst-select_ch17) [H2BLB][GISel] Add the instruction selector support
+(tag: gisel-regbank-mapping_ch17) [H2BLB][RegBankInfo] Add register mapping
+(tag: gisel-regbank-desc_ch17) [H2BLB][RegBankInfo] Describe our register banks
+(tag: ret-custom-inserter_ch17) [H2BLB][GISel] Hook up the custom inserter for RET_PSEUDO
+(tag: sdisel-truncstore-lgl_ch16) [H2BLB][SDISel] Add truncstore legalization rule
+(tag: sdisel-sret-demot_ch15, tag: add-callconv-sret-demot_ch14) [H2BLB][SDISel] Add sret demotion support
+(tag: sdisel-improved-spaddrmode_ch17) [H2BLB][SDISel] Improve selectSPAddrMode selection
+(tag: gisel-legalizerinfo_ch16, tag: begin_ch16) [H2BLB] Connect the legalizer info to the subtarget
+(tag: isel-sdnodexform_ch14) [H2BLB][SDISel] Select frame-index
+(tag: gisel-calllowering-sret_ch15) [H2BLB][IRTranslator] Structure lowering support
+(tag: end_ch14, tag: add-gisel-skeleton_ch14, tag: add-calllowering-initial-version_ch15) [H2BLB] This hook up GISel for our target
+(tag: sdisel-call-lowering-stack_ch15) [H2BLB][SDISel] Call lowering with stack arguments
+(tag: sdisel-call-lowering_ch15) [H2BLB][SDISel] Start implementing the lowering of calls
+(tag: sdisel-spaddrmode_ch17) [H2BLB][SDISel] Select load from/store to stack
+(tag: isel-add-pat_ch17) [H2BLB][SDISel] Add a pattern to select add i16
+(tag: sdisel-addrmode-fold-addimm_ch17) [H2BLB][SDISel] Fold add immediate in loads/stores
+(tag: sdisel-call-pseudos_ch15) [H2BLB][SDISel] Add pseudo instruction to lower calls
+(tag: finalize-lowering_ch17) [H2BLB][ISel] Implement finalizeLowering
+(tag: add-callconv-stack_ch15) [H2BLB][SDISel] Handle stack arguments on the callee side
+(tag: sdisel-complex-pattern_ch17) [H2BLB][SDISel] Select i16 load instruction
+(tag: fastisel-abi-arg-val_ch15) [H2BLB][FastISel] Support input arguments in registers
+(tag: add-callconv-fp_ch15) [H2BLB][SDISel] Support input arguments in registers
+(tag: isel-ldimm-pat_ch17) [H2BLB][SDISel] Select the load immediate when possible
+(tag: fastisel-ret-val_ch15) [H2BLB][FastISel] Add support for return values
+(tag: begin_ch17, tag: add-ldimm_ch17) [H2BLB] Add a load immediate instruction
+(tag: sdisel-lowerret_ch15) [H2BLB][CallConv] Teach ISel about returns lowering
+(tag: add-callconv-ret_ch15) [H2BLB] Buff up the calling convention support
+(tag: fastisel-abi-skeleton_ch15) [H2BLB][FastISel] Hook up the lowering of the arguments
+(tag: add-fastisel-skeleton_ch14) [H2BLB] Add a skeleton of FastISel
+(tag: add-sdisel-skeleton_ch14) [H2BLB] Hook up a proper SDISel implementation
+(tag: begin_ch15, tag: add-callconv-skeleton_ch15) [H2BLB] Skeleton of the calling convention
+(tag: connect-tgtinfo-apis_ch14) [H2BLB] Add the 3 main target API to the subtarget
+(tag: begin_ch14, tag: add-asm-printer_ch14) [H2BLB] Connect the AsmPrinter
 (tag: hook-up-tgt-reginfo_ch11, tag: end_ch11) [H2BLB] Add the Machine version of the RegisterInfo class
 (tag: mock-frame-lowering-impl_ch11) [H2BLB] Add a skeleton for the FrameLowering class
 (tag: hook-up-tgt-instr-info_ch11) [H2BLB] Add the Machine version of the InstrInfo class

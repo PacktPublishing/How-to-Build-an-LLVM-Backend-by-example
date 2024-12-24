@@ -31,7 +31,7 @@ void H2BLBSubtarget::anchor() {}
 
 H2BLBSubtarget::H2BLBSubtarget(const Triple &TT, StringRef CPU, StringRef FS,
                                const TargetMachine &TM)
-    : H2BLBGenSubtargetInfo(TT, CPU, /*TuneCPU=*/"", FS), FrameLowering(*this),
+    : H2BLBGenSubtargetInfo(TT, CPU, /*TuneCPU=*/CPU, FS), FrameLowering(*this),
       TLInfo(TM, *this) {
   CallLoweringInfo.reset(new H2BLBCallLowering(*getTargetLowering()));
   Legalizer.reset(new H2BLBLegalizerInfo(*this));

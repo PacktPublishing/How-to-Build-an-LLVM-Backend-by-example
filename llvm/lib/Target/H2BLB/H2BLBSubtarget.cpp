@@ -16,6 +16,7 @@
 #include "GISel/H2BLBRegisterBankInfo.h"
 #include "H2BLB.h" // For H2BLB::createInstructionSelector.
 #include "H2BLBTargetMachine.h"
+#include "llvm/CodeGen/MachineScheduler.h" // For MachineSchedPolicy.
 #include "llvm/Target/TargetMachine.h"
 
 using namespace llvm;
@@ -55,4 +56,10 @@ const RegisterBankInfo *H2BLBSubtarget::getRegBankInfo() const {
 
 InstructionSelector *H2BLBSubtarget::getInstructionSelector() const {
   return InstrSelector.get();
+}
+
+void H2BLBSubtarget::overrideSchedPolicy(MachineSchedPolicy &Policy,
+                                         unsigned NumRegionInstrs) const {
+  Policy.OnlyTopDown = true;
+  Policy.OnlyBottomUp = false;
 }

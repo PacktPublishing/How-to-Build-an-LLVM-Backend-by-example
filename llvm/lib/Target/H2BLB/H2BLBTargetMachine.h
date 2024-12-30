@@ -61,6 +61,10 @@ public:
   void addPreRegBankSelect() override;
   bool addRegBankSelect() override;
   bool addGlobalInstructionSelect() override;
+
+  // Add custom machine scheduler heuristic;
+  ScheduleDAGInstrs *
+  createMachineScheduler(MachineSchedContext *C) const override;
 };
 
 } // end namespace llvm

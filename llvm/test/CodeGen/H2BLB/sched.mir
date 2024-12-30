@@ -136,9 +136,9 @@ body:             |
     ; GENERIC-NEXT: [[COPY2:%[0-9]+]]:gpr16 = COPY $r3
     ; GENERIC-NEXT: [[LDR16_:%[0-9]+]]:gpr16 = LDR16 [[COPY2]], 0
     ; GENERIC-NEXT: [[ADDi16rr:%[0-9]+]]:gpr16 = ADDi16rr [[COPY]], [[COPY1]]
+    ; GENERIC-NEXT: [[WIDENING_SMUL:%[0-9]+]]:gpr32 = WIDENING_SMUL [[COPY]], [[LDR16_]]
     ; GENERIC-NEXT: [[ADDi16rr1:%[0-9]+]]:gpr16 = ADDi16rr [[ADDi16rr]], [[ADDi16rr]]
     ; GENERIC-NEXT: [[ADDi16rr2:%[0-9]+]]:gpr16 = ADDi16rr [[ADDi16rr1]], [[ADDi16rr1]]
-    ; GENERIC-NEXT: [[WIDENING_SMUL:%[0-9]+]]:gpr32 = WIDENING_SMUL [[COPY]], [[LDR16_]]
     ; GENERIC-NEXT: [[ADDi16rr3:%[0-9]+]]:gpr16 = ADDi16rr [[ADDi16rr2]], [[WIDENING_SMUL]].sub_low16
     ; GENERIC-NEXT: $r1 = COPY [[ADDi16rr3]]
     ; GENERIC-NEXT: RETURN implicit $r0, implicit $r1

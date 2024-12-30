@@ -13,6 +13,7 @@
 // Include the generic target definitions.
 include "llvm/Target/Target.td"
 
+include "H2BLBScheduleDefs.td"
 include "H2BLBRegisterInfo.td"
 include "H2BLBCallingConvention.td"
 include "H2BLBInstrInfo.td"

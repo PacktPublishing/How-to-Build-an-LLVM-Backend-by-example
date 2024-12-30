@@ -38,6 +38,7 @@ add_llvm_target(H2BLBCodeGen
   H2BLBFastISel.cpp
   H2BLBFrameLowering.cpp
   H2BLBInstrInfo.cpp
+  H2BLBMachineScheduler.cpp
   H2BLBRegisterInfo.cpp
   H2BLBTargetMachine.cpp
   H2BLBTargetObjectFile.cpp

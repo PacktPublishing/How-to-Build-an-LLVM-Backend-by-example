@@ -35,7 +35,8 @@ void H2BLBFrameLowering::emitPrologue(MachineFunction &MF,
     const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo();
     BuildMI(MBB, MBB.begin(), DebugLoc(), TII->get(H2BLB::SUBSP), H2BLB::SP)
         .addReg(H2BLB::SP)
-        .addImm(NumBytes);
+        .addImm(NumBytes)
+        .setMIFlag(MachineInstr::FrameSetup);
   }
 }
 
@@ -50,7 +51,8 @@ void H2BLBFrameLowering::emitEpilogue(MachineFunction &MF,
     BuildMI(MBB, MBB.getFirstTerminator(), DebugLoc(), TII->get(H2BLB::ADDSP),
             H2BLB::SP)
         .addReg(H2BLB::SP)
-        .addImm(NumBytes);
+        .addImm(NumBytes)
+        .setMIFlag(MachineInstr::FrameDestroy);
   }
 }
 

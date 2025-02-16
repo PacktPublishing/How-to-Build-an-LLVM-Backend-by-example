@@ -1698,6 +1698,10 @@ enum CPUSubTypePowerPC {
   CPU_SUBTYPE_MC98601 = CPU_SUBTYPE_POWERPC_601
 };
 
+enum CPUSubTypeH2BLB {
+  CPU_SUBTYPE_H2BLB_ALL = 0,
+};
+
 Expected<uint32_t> getCPUType(const Triple &T);
 Expected<uint32_t> getCPUSubType(const Triple &T);
 Expected<uint32_t> getCPUSubType(const Triple &T, unsigned PtrAuthABIVersion,

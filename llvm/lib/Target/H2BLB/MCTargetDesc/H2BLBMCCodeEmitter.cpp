@@ -79,11 +79,8 @@ H2BLBMCCodeEmitter::getMachineOpValue(const MCInst &MI, const MCOperand &MO,
   assert(Expr->getKind() == MCExpr::SymbolRef);
 
   if (MI.getOpcode() == H2BLB::CALL) {
-    // FIXME: At this point we have to issue a fixup, but we need the
-    // MCAsmBackend to do that, which we don't have.
-    // Just do nothing for now.
-    // Fixups.push_back(MCFixup::create(0, Expr,
-    // (MCFixupKind)H2BLB::FK_H2BLB_PCRel_11));
+    Fixups.push_back(
+        MCFixup::create(0, Expr, (MCFixupKind)H2BLB::FK_H2BLB_PCRel_11));
   } else
     llvm_unreachable("We don't have any operation with symbols");
 

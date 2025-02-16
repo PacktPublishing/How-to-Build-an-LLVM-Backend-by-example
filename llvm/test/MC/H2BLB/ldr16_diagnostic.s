@@ -1,4 +1,4 @@
-// RUN: not llvm-mc -triple=h2blb %s  -o /dev/null 2>&1 | FileCheck %s
+// RUN: not llvm-mc -triple=h2blb--darwin %s  -o /dev/null 2>&1 | FileCheck %s
 
 // Check that we reject the ldi16 when it is ill-formed.
 

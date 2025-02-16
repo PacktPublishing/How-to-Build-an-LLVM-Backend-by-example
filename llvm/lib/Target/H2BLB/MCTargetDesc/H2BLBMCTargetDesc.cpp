@@ -98,4 +98,6 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeH2BLBTargetMC() {
   // Register the MC code emitter.
   TargetRegistry::RegisterMCCodeEmitter(getTheH2BLBTarget(),
                                         createH2BLBMCCodeEmitter);
+  TargetRegistry::RegisterMCAsmBackend(getTheH2BLBTarget(),
+                                       createH2BLBAsmBackend);
 }

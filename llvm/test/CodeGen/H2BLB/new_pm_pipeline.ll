@@ -1,7 +1,7 @@
-; RUN: opt -O0 -mtriple=h2blb -debug-pass-manager %s -S -o /dev/null 2>&1 | FileCheck %s --check-prefix=CHECK-O0
-; RUN: opt -O1 -mtriple=h2blb -debug-pass-manager %s -S -o /dev/null 2>&1 | FileCheck %s --check-prefix=CHECK-Opt
-; RUN: opt -O2 -mtriple=h2blb -debug-pass-manager %s -S -o /dev/null 2>&1 | FileCheck %s --check-prefix=CHECK-Opt
-; RUN: opt -O3 -mtriple=h2blb -debug-pass-manager %s -S -o /dev/null 2>&1 | FileCheck %s --check-prefix=CHECK-Opt
+; RUN: opt -O0 -mtriple=h2blb--darwin -debug-pass-manager %s -S -o /dev/null 2>&1 | FileCheck %s --check-prefix=CHECK-O0
+; RUN: opt -O1 -mtriple=h2blb--darwin -debug-pass-manager %s -S -o /dev/null 2>&1 | FileCheck %s --check-prefix=CHECK-Opt
+; RUN: opt -O2 -mtriple=h2blb--darwin -debug-pass-manager %s -S -o /dev/null 2>&1 | FileCheck %s --check-prefix=CHECK-Opt
+; RUN: opt -O3 -mtriple=h2blb--darwin -debug-pass-manager %s -S -o /dev/null 2>&1 | FileCheck %s --check-prefix=CHECK-Opt
 
 ; Check that the simple constant propagation pass is only added in the
 ; optimizing pipelines.

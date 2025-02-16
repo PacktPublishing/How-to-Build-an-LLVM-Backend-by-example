@@ -4,9 +4,9 @@
 ; module.
 ; However, for intrinsics, the middle-end is able to add the declarations
 ; on the fly.
-; Therefore, this test passes if the h2blb intrinsics are properly hooked up.
+; Therefore, this test passes if the h2blb--darwin intrinsics are properly hooked up.
 
-target triple="h2blb"
+target triple="h2blb--darwin"
 
 define i32 @widening_smul(i16 %a, i16 %b) {
 ; CHECK-LABEL: define i32 @widening_smul(

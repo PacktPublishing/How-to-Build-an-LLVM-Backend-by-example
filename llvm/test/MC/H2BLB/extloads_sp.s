@@ -1,5 +1,5 @@
-// RUN: llvm-mc -triple=h2blb %s  -o - | FileCheck %s
-// RUN: llvm-mc -triple=h2blb %s  -o - --show-encoding | FileCheck --check-prefix=ENCODING %s
+// RUN: llvm-mc -triple=h2blb--darwin %s  -o - | FileCheck %s
+// RUN: llvm-mc -triple=h2blb--darwin %s  -o - --show-encoding | FileCheck --check-prefix=ENCODING %s
 
 // For ldr<s|z>extsp8 encoding from high bits to low bits:
 // opc<5> = 0b01011

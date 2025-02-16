@@ -1,4 +1,5 @@
 add_llvm_component_library(LLVMH2BLBDesc
+  H2BLBAsmBackend.cpp
   H2BLBMachObjectWriter.cpp
   H2BLBMCAsmInfo.cpp
   H2BLBMCCodeEmitter.cpp

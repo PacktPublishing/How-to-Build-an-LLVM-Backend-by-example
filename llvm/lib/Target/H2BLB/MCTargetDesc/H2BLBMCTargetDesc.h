@@ -20,13 +20,22 @@
 namespace llvm {
 class MCContext;
 class MCCodeEmitter;
+class MCAsmBackend;
 class MCObjectTargetWriter;
+class MCRegisterInfo;
+class MCSubtargetInfo;
+class MCTargetOptions;
+class Target;
 
 MCCodeEmitter *createH2BLBMCCodeEmitter(const MCInstrInfo &MCII,
                                         MCContext &Ctx);
 
 std::unique_ptr<MCObjectTargetWriter>
 createH2BLBMachObjectWriter(uint32_t CPUType, uint32_t CPUSubType);
+
+MCAsmBackend *createH2BLBAsmBackend(const Target &T, const MCSubtargetInfo &STI,
+                                    const MCRegisterInfo &MRI,
+                                    const MCTargetOptions &Options);
 } // end namespace llvm.
 
 // Defines symbolic names for H2BLB registers.  This defines a mapping from

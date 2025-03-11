@@ -8,7 +8,7 @@ import re
 import subprocess
 
 debug = 2
-local_only = True
+local_only = False
 
 def debug_print(level, *args, **kwargs):
   if level <= debug:
@@ -79,7 +79,7 @@ def update_tag(tag: str, git_hash: str):
   cmds.append(f"git tag {tag} {git_hash}")
   # Push the tag on the server.
   if not local_only:
-    cmds.append(f"git push origin tag {tag}")
+    cmds.append(f"git push -f origin tag {tag}")
   for cmd in cmds:
     debug_print(2, cmd)
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)

@@ -1,5 +1,17 @@
 # Format is (tag: tag0, ..., tag: tagN) commit message
-# If the line doesn't look like that, it is ignored.
+# If the line doesn't look like that, it is ignored
+(tag: mcasmbackend-impl_ch21, tag: end_ch21) [H2BLB][AsmBackend] Implement the asm backend
+(tag: mcobjecttgtwriter-impl_ch21) [H2BLB][MachO] Create an object writer
+(tag: mcodeemiter-emit-fixup_ch21, tag: mccodeemitter-emit-fixup_ch21, tag: begin_ch21) [H2BLB][MCCodeEmitter] Issue call fixup
+(tag: annotate-frame-instr_ch20) [H2BLB][FrameLowering] Tag the instructions with FrameSetup/Destroy
+(tag: plug-custom-sched-strategy_ch18) [H2BLB] Hook up our custom scheduling strategy
+(tag: custom-sched-strategy_ch18) [H2BLB] Implement a custom scheduling strategy
+(tag: sched-model_ch18) [H2BLB] Describe the scheduling event for our generic processor
+(tag: add-sched-events_ch18) [H2BLB] Add some scheduling event
+(tag: sched-policy_ch18) [H2BLB] Set the default scheduling direction as top-down
+(tag: enable-misched_ch18) [H2BLB] Enable the Machine scheduler
+(tag: skeleton-sched-model_ch18) [H2BLB] Add a skeleton of a scheduling model
+(tag: subtarget-set-sched-model_ch18) [H2BLB] Pass the TuneCPU argument
 (tag: end_ch17) [H2BLB][ISel] Add extractelement test
 (tag: sdisel-custom-rewrite_ch17) [H2BLB][SDISel] Add a custom dag combine
 (tag: sdisel-custom-lgl_ch16, tag: end_ch16) [H2BLB][SDISel] Show how to do custom legalization
@@ -27,17 +39,21 @@
 (tag: ret-custom-inserter_ch17) [H2BLB][GISel] Hook up the custom inserter for RET_PSEUDO
 (tag: sdisel-truncstore-lgl_ch16) [H2BLB][SDISel] Add truncstore legalization rule
 (tag: sdisel-sret-demot_ch15, tag: add-callconv-sret-demot_ch14) [H2BLB][SDISel] Add sret demotion support
+(tag: stack-lowering-extld-movefromsp_ch20) [H2BLB] Add extld and movfromsp support to frame index elimination
 (tag: sdisel-improved-spaddrmode_ch17) [H2BLB][SDISel] Improve selectSPAddrMode selection
 (tag: gisel-legalizerinfo_ch16, tag: begin_ch16) [H2BLB] Connect the legalizer info to the subtarget
 (tag: isel-sdnodexform_ch14) [H2BLB][SDISel] Select frame-index
 (tag: gisel-calllowering-sret_ch15) [H2BLB][IRTranslator] Structure lowering support
 (tag: end_ch14, tag: add-gisel-skeleton_ch14, tag: add-calllowering-initial-version_ch15) [H2BLB] This hook up GISel for our target
-(tag: sdisel-call-lowering-stack_ch15) [H2BLB][SDISel] Call lowering with stack arguments
-(tag: sdisel-call-lowering_ch15) [H2BLB][SDISel] Start implementing the lowering of calls
+(tag: sdisel-call-lowering-stack_ch15, tag: adjust-pseudo-lowering-finalize_ch20) [H2BLB][SDISel] Call lowering with stack arguments
+(tag: regalloc-hooks_ch19) [H2BLB][InstrInfo] Implement hooks for spills
+(tag: sdisel-call-lowering_ch15, tag: adjust-pseudo-lowering-init_ch20) [H2BLB][SDISel] Start implementing the lowering of calls
+(tag: stack-lowering_ch20) [H2BLB] Implement the lowering of the stack
 (tag: sdisel-spaddrmode_ch17) [H2BLB][SDISel] Select load from/store to stack
 (tag: isel-add-pat_ch17) [H2BLB][SDISel] Add a pattern to select add i16
 (tag: sdisel-addrmode-fold-addimm_ch17) [H2BLB][SDISel] Fold add immediate in loads/stores
 (tag: sdisel-call-pseudos_ch15) [H2BLB][SDISel] Add pseudo instruction to lower calls
+(tag: fixup-decl_ch21) [H2BLB] Implement the CALL instruction
 (tag: finalize-lowering_ch17) [H2BLB][ISel] Implement finalizeLowering
 (tag: add-callconv-stack_ch15) [H2BLB][SDISel] Handle stack arguments on the callee side
 (tag: sdisel-complex-pattern_ch17) [H2BLB][SDISel] Select i16 load instruction

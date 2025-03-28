@@ -4,6 +4,9 @@ This will be linked to the main repo for this title.
 The purpose of this repository is to offer a step by step implementation of an LLVM backend from scratch.
 Use the begin_chXX end_chXX tags to follow what we do in the related chapters.
 
+This particular branch is based on the LLVM 20.1.1 release and more specifically the llvmorg-20.1.1 tag from
+the open source llvm-project.
+
 This repo also contains a `h2blb_utils` directory that contains a script that can be used to reset the tags
 referenced in the book so that they point to the relevant commits after an LLVM rebase for instance.
 

@@ -65,27 +65,35 @@ def build_msg2tags_dict(mapping_file: str) -> (dict, set):
         debug_print(1, f"discard: {line}")
   return msg2tags, tags
 
-def update_tag(tag: str, git_hash: str):
+def update_tag_locally(tag: str, git_hash: str):
   debug_print(1, f"Update tag '{tag}' at '{git_hash}'")
   global local_only
 
   cmds = []
   # Delete the tag locally.
   cmds.append(f"git tag -d {tag}")
-  # Delete the tag on the server.
-  if not local_only:
-    cmds.append(f"git push --delete origin tag {tag}")
   # Apply the tag locally.
   cmds.append(f"git tag {tag} {git_hash}")
-  # Push the tag on the server.
-  if not local_only:
-    cmds.append(f"git push -f origin tag {tag}")
   for cmd in cmds:
     debug_print(2, cmd)
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     if result.returncode != 0:
-      print(f"error running the following command: 'cmd'")
+      print(f"error running the following command: '{cmd}'")
       exit(-3)
+
+def push_tags(tags: set):
+  if not tags:
+    return
+  tags = " ".join(tags)
+  debug_print(1, f"Push tags '{tags}'")
+
+  # Since we force push we don't have to delete the tags beforehand.
+  cmd = (f"git push -f origin tag {tags}")
+  debug_print(2, cmd)
+  result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+  if result.returncode != 0:
+    print(f"error pushing tags with the following command: '{cmd}'")
+    exit(-3)
 
 def main():
   args = parse_args()
@@ -94,6 +102,7 @@ def main():
     print(f"error: {msg}\n")
     exit(-1)
   msg2tags, tags = build_msg2tags_dict(args.filename)
+  all_tags = tags.copy()
   for key, value in msg2tags.items():
     debug_print(3, f"key {key}")
     debug_print(3, f"values {value}")
@@ -124,7 +133,7 @@ def main():
           for tag in set_of_tags:
             debug_print(2, f"found tag '{tag}' at '{git_hash}'")
             tags.remove(tag)
-            update_tag(tag, git_hash)
+            update_tag_locally(tag, git_hash)
           # stop processing the commits if we already found everything
           if not tags:
             break
@@ -132,6 +141,10 @@ def main():
         debug_print(1, f"no match: {commit}")
     print(f"Nb tags to find: {len(tags)}")
     skip += args.chunk
+
+  global local_only
+  if not local_only:
+    push_tags(all_tags)
 
   if tags:
     print(f"Didn't find the following {len(tags)} tags: {tags}")
